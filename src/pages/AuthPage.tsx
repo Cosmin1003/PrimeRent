@@ -35,8 +35,8 @@ export default function AuthPage() {
             variables: {
               default: {
                 colors: {
-                  brand: "#10b981", // Emerald 500
-                  brandAccent: "#059669", // Emerald 600
+                  brand: "#10b981",
+                  brandAccent: "#059669",
                   inputBackground: "transparent",
                   inputText: "black",
                   inputPlaceholder: "#9ca3af",

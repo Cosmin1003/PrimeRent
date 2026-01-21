@@ -24,13 +24,11 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Updated loading background to white/light grey
   if (loading) return <div className="bg-white min-h-screen" />;
 
   return (
     <Router>
       <Navbar user={session?.user} />
-      {/* Light theme main container */}
       <main className="pt-16 min-h-screen bg-gray-50 text-slate-900">
         <Routes>
           <Route path="/" element={<HomePage user={session?.user} />} />
