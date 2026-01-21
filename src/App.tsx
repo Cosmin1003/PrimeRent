@@ -1,12 +1,9 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
+import Navbar from "./components/Navbar";
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -27,15 +24,19 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (loading) return <div className="bg-slate-950 min-h-screen" />;
+  // Updated loading background to white/light grey
+  if (loading) return <div className="bg-white min-h-screen" />;
 
   return (
     <Router>
-      <Routes>
-        {/* Now both are public routes */}
-        <Route path="/" element={<HomePage user={session?.user} />} />
-        <Route path="/auth" element={<AuthPage />} />
-      </Routes>
+      <Navbar user={session?.user} />
+      {/* Light theme main container */}
+      <main className="pt-16 min-h-screen bg-gray-50 text-slate-900">
+        <Routes>
+          <Route path="/" element={<HomePage user={session?.user} />} />
+          <Route path="/auth" element={<AuthPage />} />
+        </Routes>
+      </main>
     </Router>
   );
 }
