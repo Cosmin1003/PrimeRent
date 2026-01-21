@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, Search } from "lucide-react";
 import { Link } from "react-router-dom"; // Added for routing
 import { supabase } from "../supabaseClient"; // Import your client
 import { cn } from "@/lib/utils";
@@ -63,18 +63,19 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                 {/* Increased gap for a cleaner look */}
                 <NavigationMenuItem>
                   <Link
-                    to="/"
-                    className="text-[19px] font-bold text-black hover:text-emerald-600 transition-colors"
+                    to="/explore"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 shadow-sm rounded-full text-[18px] font-bold text-black hover:shadow-md hover:border-emerald-500 transition-all group"
                   >
-                    Discover
+                    <Search className="size-4 text-emerald-600 group-hover:scale-110 transition-transform" />
+                    <span>Explore Destinations</span>
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <Link
                     to="/"
-                    className="text-[19px] font-bold text-black hover:text-emerald-600 transition-colors"
+                    className="text-[18px] font-bold text-black hover:text-emerald-600 transition-colors"
                   >
-                    Properties
+                    My Bookings
                   </Link>
                 </NavigationMenuItem>
               </NavigationMenuList>
@@ -134,11 +135,11 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                 </SheetHeader>
                 <div className="flex flex-col gap-6 p-4">
                   <div className="flex flex-col gap-4">
-                    <Link to="/" className="text-md font-semibold">
-                      Discover
+                    <Link to="/explore" className="text-md font-semibold">
+                      Explore
                     </Link>
                     <Link to="/" className="text-md font-semibold">
-                      Properties
+                      My Bookings
                     </Link>
                   </div>
 
