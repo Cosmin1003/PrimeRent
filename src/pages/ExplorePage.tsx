@@ -51,31 +51,24 @@ export default function ExplorePage() {
   const fetchProperties = async () => {
     setLoading(true);
     try {
-      let query = supabase
-        .from("properties")
-        .select(
-          `
-          *,
-          profiles (full_name)
-        `,
-        )
-        .eq("is_active", true);
-
-      if (location) {
-        query = query.ilike("city", `%${location}%`);
-      }
-
-      if (guests) {
-        query = query.gte("max_guests", guests);
-      }
-
-      // Logic Note: To filter by 'date', you would typically use an RPC
-      // or a subquery to exclude properties with overlapping bookings.
-
-      const { data, error } = await query;
+      // We send our states as parameters to the RPC
+      const { data, error } = await supabase.rpc("search_properties", {
+        p_city: location || null,
+        p_guests: guests,
+        p_start_date: date?.from ? format(date.from, "yyyy-MM-dd") : null,
+        p_end_date: date?.to ? format(date.to, "yyyy-MM-dd") : null,
+      });
 
       if (error) throw error;
-      setProperties(data || []);
+
+      // Note: Since our RPC returns 'host_full_name' directly,
+      // we map it to match your PropertyCard's expected structure
+      const formattedData = data.map((item: any) => ({
+        ...item,
+        profiles: { full_name: item.host_full_name },
+      }));
+
+      setProperties(formattedData);
     } catch (error) {
       console.error("Error fetching properties:", error);
     } finally {
@@ -164,7 +157,9 @@ export default function ExplorePage() {
                 <PopoverContent className="w-72 p-6 rounded-3xl" align="end">
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="font-bold text-gray-900">Number of Guests</span>
+                      <span className="font-bold text-gray-900">
+                        Number of Guests
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-4">
