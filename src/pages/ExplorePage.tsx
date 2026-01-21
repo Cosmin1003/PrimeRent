@@ -90,6 +90,18 @@ export default function ExplorePage() {
     fetchProperties();
   }, []);
 
+  const resetFilters = () => {
+    setLocation("");
+    setGuests(1);
+    setDate({ from: undefined, to: undefined });
+
+    // Optionally refetch properties immediately
+    // fetchProperties();
+  };
+
+  // Check if any filter is currently active
+  const isFiltered = location !== "" || guests > 1 || date?.from !== undefined;
+
   return (
     <div className=" bg-white md:bg-gray-50 pt-15 pb-20">
       <div className="container max-w-7xl mx-auto px-4 md:px-6">
@@ -98,16 +110,27 @@ export default function ExplorePage() {
           {/* 1. Location */}
           <div className="flex flex-[1.2] items-center gap-3 px-6 py-2 border-r border-gray-200 group">
             <MapPin className="text-emerald-600 size-5" />
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full relative">
               <span className="text-[10px] font-extrabold uppercase text-gray-500">
                 Where
               </span>
-              <input
-                placeholder="Search destinations"
-                className="bg-transparent border-none focus:outline-none text-sm font-semibold placeholder:text-gray-400 placeholder:font-normal"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
+              <div className="flex items-center group">
+                <input
+                  placeholder="Search destinations"
+                  className="bg-transparent border-none focus:outline-none text-sm font-semibold placeholder:text-gray-400 w-full"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                />
+                {location && (
+                  <button
+                    onClick={() => setLocation("")}
+                    className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600"
+                  >
+                    <Plus className="rotate-45 size-4" />{" "}
+                    {/* Rotating a plus makes an X */}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -137,14 +160,26 @@ export default function ExplorePage() {
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 rounded-3xl" align="center">
+                <div className="p-4 border-b flex justify-between items-center">
+                  <span className="text-sm font-bold">Select Dates</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDate({ from: undefined, to: undefined })}
+                    className="text-xs underline"
+                  >
+                    Clear dates
+                  </Button>
+                </div>
                 <Calendar
                   initialFocus
                   mode="range"
-                  defaultMonth={date?.from}
                   selected={date}
                   onSelect={setDate}
                   numberOfMonths={2}
-                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                  disabled={(date) =>
+                    date < new Date(new Date().setHours(0, 0, 0, 0))
+                  }
                 />
               </PopoverContent>
             </Popover>
@@ -200,6 +235,15 @@ export default function ExplorePage() {
               </Popover>
             </div>
           </div>
+
+          {isFiltered && (
+            <button
+              onClick={resetFilters}
+              className="text-xs font-bold text-gray-500 hover:text-black px-4 underline underline-offset-4 transition-colors"
+            >
+              Clear all
+            </button>
+          )}
 
           {/* Search Button */}
           <Button
