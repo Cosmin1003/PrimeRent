@@ -51,26 +51,36 @@ export default function ExplorePage() {
   const fetchProperties = async () => {
     setLoading(true);
     try {
-      // We send our states as parameters to the RPC
+      // 1. Prepare dates. If the user only picked one date, treat as null
+      // so the backend doesn't try to filter an invalid range.
+      const startDate =
+        date?.from && date?.to ? format(date.from, "yyyy-MM-dd") : null;
+
+      const endDate =
+        date?.from && date?.to ? format(date.to, "yyyy-MM-dd") : null;
+
+      // 2. Call the RPC
       const { data, error } = await supabase.rpc("search_properties", {
-        p_city: location || null,
-        p_guests: guests,
-        p_start_date: date?.from ? format(date.from, "yyyy-MM-dd") : null,
-        p_end_date: date?.to ? format(date.to, "yyyy-MM-dd") : null,
+        p_city: location.trim() === "" ? null : location,
+        p_guests: guests || 1,
+        p_start_date: startDate,
+        p_end_date: endDate,
       });
 
       if (error) throw error;
 
-      // Note: Since our RPC returns 'host_full_name' directly,
-      // we map it to match your PropertyCard's expected structure
+      // 3. Map the flat SQL response back to your React Component's expected structure
       const formattedData = data.map((item: any) => ({
-        ...item,
-        profiles: { full_name: item.host_full_name },
+        ...item, // This includes id, title, city, address, price, image
+        profiles: {
+          full_name: item.host_full_name, // Map the flat SQL column to the nested object
+        },
       }));
 
       setProperties(formattedData);
     } catch (error) {
       console.error("Error fetching properties:", error);
+      // Optional: add a toast or alert for the user here
     } finally {
       setLoading(false);
     }
@@ -134,6 +144,7 @@ export default function ExplorePage() {
                   selected={date}
                   onSelect={setDate}
                   numberOfMonths={2}
+                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                 />
               </PopoverContent>
             </Popover>
