@@ -5,6 +5,7 @@ import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import Navbar from "./components/Navbar";
 import { Navbar1 } from "./components/navbar1";
+import ExplorePage from "./pages/ExplorePage";
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -35,6 +36,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage user={session?.user} />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/explore" element={<ExplorePage />} /> 
         </Routes>
       </main>
     </Router>

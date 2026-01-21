@@ -1,0 +1,294 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { supabase } from "../supabaseClient";
+import {
+  Search,
+  Users,
+  Calendar as CalendarIcon,
+  MapPin,
+  Star,
+} from "lucide-react";
+import { format } from "date-fns";
+import { type DateRange } from "react-day-picker";
+
+// Shadcn UI Components
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Minus, Plus } from "lucide-react";
+
+// --- Types ---
+interface Property {
+  id: string;
+  title: string;
+  city: string;
+  address: string;
+  price_per_night: number;
+  max_guests: number;
+  main_image: string;
+  profiles: { full_name: string };
+}
+
+export default function ExplorePage() {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // --- Search States ---
+  const [location, setLocation] = useState("");
+  const [guests, setGuests] = useState(1);
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: undefined,
+    to: undefined,
+  });
+
+  // --- Data Fetching ---
+  const fetchProperties = async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from("properties")
+        .select(
+          `
+          *,
+          profiles (full_name)
+        `,
+        )
+        .eq("is_active", true);
+
+      if (location) {
+        query = query.ilike("city", `%${location}%`);
+      }
+
+      if (guests) {
+        query = query.gte("max_guests", guests);
+      }
+
+      // Logic Note: To filter by 'date', you would typically use an RPC
+      // or a subquery to exclude properties with overlapping bookings.
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      setProperties(data || []);
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  return (
+    <div className=" bg-white md:bg-gray-50 pt-15 pb-20">
+      <div className="container max-w-7xl mx-auto px-4 md:px-6">
+        {/* --- DESKTOP SEARCH BAR (3-PART PILL) --- */}
+        <div className="hidden md:flex bg-white p-2 rounded-full shadow-lg border border-gray-200 items-center max-w-4xl mx-auto mb-12">
+          {/* 1. Location */}
+          <div className="flex flex-[1.2] items-center gap-3 px-6 py-2 border-r border-gray-200 group">
+            <MapPin className="text-emerald-600 size-5" />
+            <div className="flex flex-col w-full">
+              <span className="text-[10px] font-extrabold uppercase text-gray-500">
+                Where
+              </span>
+              <input
+                placeholder="Search destinations"
+                className="bg-transparent border-none focus:outline-none text-sm font-semibold placeholder:text-gray-400 placeholder:font-normal"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* 2. Date Range Picker */}
+          <div className="flex-1 border-r border-gray-200">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="flex items-center gap-3 px-6 py-2 w-full text-left hover:bg-gray-50/50 rounded-none transition-colors">
+                  <CalendarIcon className="text-emerald-600 size-5" />
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="text-[10px] font-extrabold uppercase text-gray-500">
+                      When
+                    </span>
+                    <span
+                      className={cn(
+                        "text-sm font-semibold truncate",
+                        !date?.from && "text-gray-400 font-normal",
+                      )}
+                    >
+                      {date?.from
+                        ? date.to
+                          ? `${format(date.from, "MMM dd")} - ${format(date.to, "MMM dd")}`
+                          : format(date.from, "MMM dd")
+                        : "Add dates"}
+                    </span>
+                  </div>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 rounded-3xl" align="center">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={date?.from}
+                  selected={date}
+                  onSelect={setDate}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* 3. Guests */}
+          <div className="flex flex-1 items-center gap-3 px-6 py-2">
+            <Users className="text-emerald-600 size-5" />
+            <div className="flex flex-col w-full">
+              <span className="text-[10px] font-extrabold uppercase text-gray-500">
+                Who
+              </span>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="text-sm font-semibold text-left hover:text-emerald-600 transition-colors">
+                    {guests === 1 ? "1 guest" : `${guests} guests`}
+                  </button>
+                </PopoverTrigger>
+
+                <PopoverContent className="w-72 p-6 rounded-3xl" align="end">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-gray-900">Number of Guests</span>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      {/* Decrement Button */}
+                      <button
+                        onClick={() => setGuests(Math.max(1, guests - 1))}
+                        disabled={guests <= 1}
+                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      >
+                        <Minus className="size-4" />
+                      </button>
+
+                      <span className="w-4 text-center font-semibold tabular-nums">
+                        {guests}
+                      </span>
+
+                      {/* Increment Button */}
+                      <button
+                        onClick={() => setGuests(guests + 1)}
+                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black transition-all"
+                      >
+                        <Plus className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          {/* Search Button */}
+          <Button
+            onClick={fetchProperties}
+            className="bg-emerald-600 hover:bg-emerald-700 rounded-full h-12 px-6 ml-2 transition-all active:scale-95"
+          >
+            <Search className="size-5 mr-2" />
+            <span className="font-bold mr-1">Search</span>
+          </Button>
+        </div>
+
+        {/* --- MOBILE SEARCH TRIGGER (Simplified) --- */}
+        <div className="md:hidden mb-8">
+          <Button className="w-full bg-white border border-gray-200 text-black shadow-md rounded-full py-6 flex justify-start px-6 gap-4 hover:bg-white">
+            <Search className="text-emerald-600" />
+            <div className="flex flex-col items-start">
+              <span className="text-sm font-bold">Where to?</span>
+              <span className="text-[11px] text-gray-500">
+                Anywhere • Any week • Add guests
+              </span>
+            </div>
+          </Button>
+        </div>
+
+        {/* --- PROPERTY GRID --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+          {loading ? (
+            Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="bg-gray-200 aspect-square rounded-2xl mb-4" />
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-1/2" />
+              </div>
+            ))
+          ) : properties.length > 0 ? (
+            properties.map((prop) => (
+              <PropertyCard key={prop.id} property={prop} />
+            ))
+          ) : (
+            <div className="col-span-full py-20 text-center">
+              <p className="text-xl font-semibold text-gray-900">
+                No properties found
+              </p>
+              <p className="text-gray-500">
+                Try adjusting your filters or search area.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Sub-component: PropertyCard ---
+function PropertyCard({ property }: { property: Property }) {
+  return (
+    <div className="group cursor-pointer flex flex-col">
+      {/* Image Container */}
+      <div className="relative aspect-square overflow-hidden rounded-xl mb-3 shadow-sm">
+        <img
+          src={
+            property.main_image ||
+            "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=2070&auto=format&fit=crop"
+          }
+          alt={property.title}
+          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+        />
+        <button className="absolute top-3 right-3 p-2 rounded-full bg-black/10 backdrop-blur-md hover:bg-black/20 transition">
+          <Star className="size-4 text-white fill-white/20" />
+        </button>
+      </div>
+
+      {/* Info */}
+      <div className="flex justify-between items-start leading-tight">
+        <h3 className="font-bold text-[15px] text-gray-900 truncate">
+          {property.city}, {property.address}
+        </h3>
+        <div className="flex items-center gap-1 text-sm font-medium">
+          <Star className="size-3 fill-black" />
+          <span>4.92</span>
+        </div>
+      </div>
+
+      <p className="text-gray-500 text-[14px] mt-0.5 truncate">
+        {property.title}
+      </p>
+      <p className="text-gray-400 text-[14px]">
+        Hosted by {property.profiles?.full_name || "Host"}
+      </p>
+
+      <p className="mt-2 text-[15px]">
+        <span className="font-bold">${property.price_per_night}</span>
+        <span className="text-gray-600 font-normal"> night</span>
+      </p>
+    </div>
+  );
+}
