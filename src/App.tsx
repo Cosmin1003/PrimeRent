@@ -4,6 +4,7 @@ import { supabase } from "./supabaseClient";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import Navbar from "./components/Navbar";
+import { Navbar1 } from "./components/navbar1";
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -28,7 +29,8 @@ function App() {
 
   return (
     <Router>
-      <Navbar user={session?.user} />
+      <Navbar1 user={session?.user} />
+      {/* <Navbar user={session?.user} /> */}
       <main className="pt-16 min-h-screen bg-gray-50 text-slate-900">
         <Routes>
           <Route path="/" element={<HomePage user={session?.user} />} />
