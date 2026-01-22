@@ -180,6 +180,19 @@ export default function ExplorePage() {
                   disabled={(date) =>
                     date < new Date(new Date().setHours(0, 0, 0, 0))
                   }
+                  classNames={{
+                    // Target the buttons inside the calendar using their data attributes
+                    day: cn(
+                      "[&_[data-range-start=true]]:!bg-emerald-600 [&_[data-range-start=true]]:!text-white",
+                      "[&_[data-range-end=true]]:!bg-emerald-600 [&_[data-range-end=true]]:!text-white",
+                      "[&_[data-range-middle=true]]:!bg-emerald-100 [&_[data-range-middle=true]]:!text-emerald-900",
+                      "[&_[data-selected-single=true]]:!bg-emerald-600 [&_[data-selected-single=true]]:!text-white",
+                    ),
+                    // Target the range background (the cell itself)
+                    range_start: "!bg-emerald-600 !rounded-l-md",
+                    range_end: "!bg-emerald-600 !rounded-r-md",
+                    range_middle: "!bg-emerald-100",
+                  }}
                 />
               </PopoverContent>
             </Popover>
