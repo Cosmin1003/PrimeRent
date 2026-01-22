@@ -25,12 +25,12 @@ import {
 import { cn } from "@/lib/utils";
 import { Minus, Plus } from "lucide-react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+  DialogHeader,
+} from "@/components/ui/dialog";
 
 // --- Types ---
 interface Property {
@@ -314,9 +314,9 @@ export default function ExplorePage() {
             </div>
           </div>
 
-          {/* 2. FILTER BUTTON (Standalone) */}
-          <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-            <SheetTrigger asChild>
+          {/* 2. FILTER BUTTON */}
+          <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <DialogTrigger asChild>
               <Button
                 variant="outline"
                 onClick={() => setTempSelectedAmenities(selectedAmenities)}
@@ -330,58 +330,61 @@ export default function ExplorePage() {
                   </span>
                 )}
               </Button>
-            </SheetTrigger>
+            </DialogTrigger>
 
-            <SheetContent className="flex flex-col h-full w-full sm:max-w-md p-0">
-              <SheetHeader className="p-6 border-b">
-                <SheetTitle className="text-xl font-bold">Filters</SheetTitle>
-              </SheetHeader>
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Amenities</h3>
-                  <div className="space-y-4">
-                    {allAmenities.map((amenity) => (
+            {/* DIALOG CONTENT: This must be rendered in a Portal to center on screen */}
+            <DialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-white p-0 shadow-lg duration-200 sm:rounded-3xl overflow-hidden">
+              <DialogHeader className="p-6 border-b">
+                <DialogTitle className="text-xl font-bold text-center">
+                  Filters
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="flex-1 overflow-y-auto p-6 max-h-[60vh]">
+                <h3 className="text-lg font-semibold mb-4">Amenities</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {allAmenities.map((amenity) => (
+                    <div
+                      key={amenity.id}
+                      className="flex items-center justify-between cursor-pointer p-2 hover:bg-gray-50 rounded-lg"
+                      onClick={() => toggleTempAmenity(amenity.id)}
+                    >
+                      <label className="text-sm font-medium cursor-pointer">
+                        {amenity.name}
+                      </label>
                       <div
-                        key={amenity.id}
-                        className="flex items-center justify-between cursor-pointer"
-                        onClick={() => toggleTempAmenity(amenity.id)}
+                        className={cn(
+                          "w-6 h-6 rounded-md border flex items-center justify-center transition-colors",
+                          tempSelectedAmenities.includes(amenity.id)
+                            ? "bg-emerald-600 border-emerald-600"
+                            : "border-gray-300",
+                        )}
                       >
-                        <label className="text-sm font-medium leading-none cursor-pointer">
-                          {amenity.name}
-                        </label>
-                        <div
-                          className={cn(
-                            "w-6 h-6 rounded-md border flex items-center justify-center transition-colors",
-                            tempSelectedAmenities.includes(amenity.id)
-                              ? "bg-emerald-600 border-emerald-600"
-                              : "border-gray-300",
-                          )}
-                        >
-                          {tempSelectedAmenities.includes(amenity.id) && (
-                            <Check className="text-white size-4" />
-                          )}
-                        </div>
+                        {tempSelectedAmenities.includes(amenity.id) && (
+                          <Check className="text-white size-4" />
+                        )}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="p-6 border-t bg-white flex items-center justify-between">
+
+              <div className="p-4 border-t bg-white flex items-center justify-between px-6">
                 <button
                   onClick={() => setTempSelectedAmenities([])}
-                  className="text-sm font-bold underline hover:text-gray-600"
+                  className="text-sm font-bold underline"
                 >
                   Clear all
                 </button>
                 <Button
                   onClick={handleApplyFilters}
-                  className="bg-black text-white px-8 rounded-lg h-12 hover:bg-zinc-800"
+                  className="bg-black text-white px-8 rounded-xl h-12"
                 >
                   Show results
                 </Button>
               </div>
-            </SheetContent>
-          </Sheet>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* --- MOBILE SEARCH TRIGGER --- */}
