@@ -150,275 +150,281 @@ export default function ExplorePage() {
   const isFiltered = location !== "" || guests > 1 || date?.from !== undefined;
 
   return (
-  <div className="bg-white md:bg-gray-50 pt-15 pb-20">
-    <div className="container max-w-7xl mx-auto px-4 md:px-6">
-      
-      {/* --- DESKTOP TOP BAR (Search + Filter Separated) --- */}
-      <div className="hidden md:flex items-center justify-center gap-4 mb-12">
-        
-        {/* 1. SEARCH BAR (The Pill) */}
-        <div className="flex flex-1 bg-white p-2 rounded-full shadow-lg border border-gray-200 items-center max-w-4xl">
-          {/* Location */}
-          <div className="flex flex-[1.2] items-center gap-3 px-6 py-2 border-r border-gray-200 group">
-            <MapPin className="text-emerald-600 size-5" />
-            <div className="flex flex-col w-full relative">
-              <span className="text-[10px] font-extrabold uppercase text-gray-500">
-                Where
-              </span>
-              <div className="flex items-center group">
-                <input
-                  placeholder="Search destinations"
-                  className="bg-transparent border-none focus:outline-none text-sm font-semibold placeholder:text-gray-400 w-full"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                />
-                {location && (
-                  <button
-                    onClick={() => setLocation("")}
-                    className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600"
-                  >
-                    <Plus className="rotate-45 size-4" />
-                  </button>
-                )}
+    <div className="bg-white md:bg-gray-50 pt-15 pb-20">
+      <div className="container max-w-7xl mx-auto px-4 md:px-6">
+        {/* --- DESKTOP TOP BAR (Search + Filter Separated) --- */}
+        <div className="hidden md:flex items-center justify-center gap-4 mb-12">
+          {/* 1. SEARCH BAR (The Pill) */}
+          <div className="flex flex-1 bg-white p-2 rounded-full shadow-lg border border-gray-200 items-center max-w-4xl">
+            {/* Location */}
+            <div className="flex flex-[1.2] items-center gap-3 px-6 py-2 border-r border-gray-200 group">
+              <MapPin className="text-emerald-600 size-5" />
+              <div className="flex flex-col w-full relative">
+                <span className="text-[10px] font-extrabold uppercase text-gray-500">
+                  Where
+                </span>
+                <div className="flex items-center group">
+                  <input
+                    placeholder="Search destinations"
+                    className="bg-transparent border-none focus:outline-none text-sm font-semibold placeholder:text-gray-400 w-full"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
+                  {location && (
+                    <button
+                      onClick={() => setLocation("")}
+                      className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600"
+                    >
+                      <Plus className="rotate-45 size-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Date Range Picker */}
-          <div className="flex-1 border-r border-gray-200">
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className="flex items-center gap-3 px-6 py-2 w-full text-left hover:bg-gray-50/50 rounded-none transition-colors">
-                  <CalendarIcon className="text-emerald-600 size-5" />
-                  <div className="flex flex-col overflow-hidden">
-                    <span className="text-[10px] font-extrabold uppercase text-gray-500">
-                      When
-                    </span>
-                    <span
-                      className={cn(
-                        "text-sm font-semibold truncate",
-                        !date?.from && "text-gray-400 font-normal",
-                      )}
-                    >
-                      {date?.from
-                        ? date.to
-                          ? `${format(date.from, "MMM dd")} - ${format(date.to, "MMM dd")}`
-                          : format(date.from, "MMM dd")
-                        : "Add dates"}
-                    </span>
-                  </div>
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 rounded-3xl" align="center">
-                <div className="p-4 border-b flex justify-between items-center">
-                  <span className="text-sm font-bold">Select Dates</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDate({ from: undefined, to: undefined })}
-                    className="text-xs underline"
-                  >
-                    Clear dates
-                  </Button>
-                </div>
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  selected={date}
-                  onSelect={setDate}
-                  numberOfMonths={2}
-                  disabled={(date) =>
-                    date < new Date(new Date().setHours(0, 0, 0, 0))
-                  }
-                  classNames={{
-                    day: cn(
-                      "[&_[data-range-start=true]]:!bg-emerald-600 [&_[data-range-start=true]]:!text-white",
-                      "[&_[data-range-end=true]]:!bg-emerald-600 [&_[data-range-end=true]]:!text-white",
-                      "[&_[data-range-middle=true]]:!bg-emerald-100 [&_[data-range-middle=true]]:!text-emerald-900",
-                      "[&_[data-selected-single=true]]:!bg-emerald-600 [&_[data-selected-single=true]]:!text-white",
-                    ),
-                    range_start: "!bg-emerald-600 !rounded-l-md",
-                    range_end: "!bg-emerald-600 !rounded-r-md",
-                    range_middle: "!bg-emerald-100",
-                  }}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Guests */}
-          <div className="flex flex-1 items-center gap-3 px-6 py-2">
-            <Users className="text-emerald-600 size-5" />
-            <div className="flex flex-col w-full">
-              <span className="text-[10px] font-extrabold uppercase text-gray-500">
-                Who
-              </span>
+            {/* Date Range Picker */}
+            <div className="flex-1 border-r border-gray-200">
               <Popover>
                 <PopoverTrigger asChild>
-                  <button className="text-sm font-semibold text-left hover:text-emerald-600 transition-colors">
-                    {guests === 1 ? "1 guest" : `${guests} guests`}
+                  <button className="flex items-center gap-3 px-6 py-2 w-full text-left hover:bg-gray-50/50 rounded-none transition-colors">
+                    <CalendarIcon className="text-emerald-600 size-5" />
+                    <div className="flex flex-col overflow-hidden">
+                      <span className="text-[10px] font-extrabold uppercase text-gray-500">
+                        When
+                      </span>
+                      <span
+                        className={cn(
+                          "text-sm font-semibold truncate",
+                          !date?.from && "text-gray-400 font-normal",
+                        )}
+                      >
+                        {date?.from
+                          ? date.to
+                            ? `${format(date.from, "MMM dd")} - ${format(date.to, "MMM dd")}`
+                            : format(date.from, "MMM dd")
+                          : "Add dates"}
+                      </span>
+                    </div>
                   </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-72 p-6 rounded-3xl" align="end">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="font-bold text-gray-900">
-                        Number of Guests
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => setGuests(Math.max(1, guests - 1))}
-                        disabled={guests <= 1}
-                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black disabled:opacity-30 transition-all"
-                      >
-                        <Minus className="size-4" />
-                      </button>
-                      <span className="w-4 text-center font-semibold tabular-nums">
-                        {guests}
-                      </span>
-                      <button
-                        onClick={() => setGuests(guests + 1)}
-                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black transition-all"
-                      >
-                        <Plus className="size-4" />
-                      </button>
-                    </div>
+                <PopoverContent
+                  className="w-auto p-0 rounded-3xl"
+                  align="center"
+                >
+                  <div className="p-4 border-b flex justify-between items-center">
+                    <span className="text-sm font-bold">Select Dates</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setDate({ from: undefined, to: undefined })
+                      }
+                      className="text-xs underline"
+                    >
+                      Clear dates
+                    </Button>
                   </div>
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    selected={date}
+                    onSelect={setDate}
+                    numberOfMonths={2}
+                    disabled={(date) =>
+                      date < new Date(new Date().setHours(0, 0, 0, 0))
+                    }
+                    classNames={{
+                      day: cn(
+                        "[&_[data-range-start=true]]:!bg-emerald-600 [&_[data-range-start=true]]:!text-white",
+                        "[&_[data-range-end=true]]:!bg-emerald-600 [&_[data-range-end=true]]:!text-white",
+                        "[&_[data-range-middle=true]]:!bg-emerald-100 [&_[data-range-middle=true]]:!text-emerald-900",
+                        "[&_[data-selected-single=true]]:!bg-emerald-600 [&_[data-selected-single=true]]:!text-white",
+                      ),
+                      range_start: "!bg-emerald-600 !rounded-l-md",
+                      range_end: "!bg-emerald-600 !rounded-r-md",
+                      range_middle: "!bg-emerald-100",
+                    }}
+                  />
                 </PopoverContent>
               </Popover>
             </div>
+
+            {/* Guests */}
+            <div className="flex flex-1 items-center gap-3 px-6 py-2">
+              <Users className="text-emerald-600 size-5" />
+              <div className="flex flex-col w-full">
+                <span className="text-[10px] font-extrabold uppercase text-gray-500">
+                  Who
+                </span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="text-sm font-semibold text-left hover:text-emerald-600 transition-colors">
+                      {guests === 1 ? "1 guest" : `${guests} guests`}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-6 rounded-3xl" align="end">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-gray-900">
+                          Number of Guests
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={() => setGuests(Math.max(1, guests - 1))}
+                          disabled={guests <= 1}
+                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black disabled:opacity-30 transition-all"
+                        >
+                          <Minus className="size-4" />
+                        </button>
+                        <span className="w-4 text-center font-semibold tabular-nums">
+                          {guests}
+                        </span>
+                        <button
+                          onClick={() => setGuests(guests + 1)}
+                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black transition-all"
+                        >
+                          <Plus className="size-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <div className="relative flex items-center pr-2">
+              {/* Absolute "Clear all" button */}
+              {isFiltered && (
+                <button
+                  onClick={resetFilters}
+                  className="absolute -left-20 text-xs font-bold text-gray-500 hover:text-black underline underline-offset-4 transition-colors whitespace-nowrap"
+                >
+                  Clear all
+                </button>
+              )}
+
+              <Button
+                onClick={fetchProperties}
+                className="bg-emerald-600 hover:bg-emerald-700 rounded-full h-12 px-6 transition-all active:scale-95"
+              >
+                <Search className="size-5 mr-2" />
+                <span className="font-bold">Search</span>
+              </Button>
+            </div>
           </div>
 
-          {isFiltered && (
-            <button
-              onClick={resetFilters}
-              className="text-xs font-bold text-gray-500 hover:text-black px-4 underline underline-offset-4 transition-colors"
-            >
-              Clear all
-            </button>
-          )}
+          {/* 2. FILTER BUTTON (Standalone) */}
+          <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                onClick={() => setTempSelectedAmenities(selectedAmenities)}
+                className="rounded-full h-14 !px-6 border-gray-200 bg-white hover:bg-gray-50 shadow-md flex gap-2"
+              >
+                <SlidersHorizontal className="size-4" />
+                <span className="font-bold">Filters</span>
+                {selectedAmenities.length > 0 && (
+                  <span className="bg-black text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
+                    {selectedAmenities.length}
+                  </span>
+                )}
+              </Button>
+            </SheetTrigger>
 
-          <Button
-            onClick={fetchProperties}
-            className="bg-emerald-600 hover:bg-emerald-700 rounded-full h-12 px-6 ml-2 transition-all active:scale-95"
-          >
-            <Search className="size-5 mr-2" />
-            <span className="font-bold">Search</span>
+            <SheetContent className="flex flex-col h-full w-full sm:max-w-md p-0">
+              <SheetHeader className="p-6 border-b">
+                <SheetTitle className="text-xl font-bold">Filters</SheetTitle>
+              </SheetHeader>
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Amenities</h3>
+                  <div className="space-y-4">
+                    {allAmenities.map((amenity) => (
+                      <div
+                        key={amenity.id}
+                        className="flex items-center justify-between cursor-pointer"
+                        onClick={() => toggleTempAmenity(amenity.id)}
+                      >
+                        <label className="text-sm font-medium leading-none cursor-pointer">
+                          {amenity.name}
+                        </label>
+                        <div
+                          className={cn(
+                            "w-6 h-6 rounded-md border flex items-center justify-center transition-colors",
+                            tempSelectedAmenities.includes(amenity.id)
+                              ? "bg-emerald-600 border-emerald-600"
+                              : "border-gray-300",
+                          )}
+                        >
+                          {tempSelectedAmenities.includes(amenity.id) && (
+                            <Check className="text-white size-4" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 border-t bg-white flex items-center justify-between">
+                <button
+                  onClick={() => setTempSelectedAmenities([])}
+                  className="text-sm font-bold underline hover:text-gray-600"
+                >
+                  Clear all
+                </button>
+                <Button
+                  onClick={handleApplyFilters}
+                  className="bg-black text-white px-8 rounded-lg h-12 hover:bg-zinc-800"
+                >
+                  Show results
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        {/* --- MOBILE SEARCH TRIGGER --- */}
+        <div className="md:hidden mb-8">
+          <Button className="w-full bg-white border border-gray-200 text-black shadow-md rounded-full py-6 flex justify-start px-6 gap-4 hover:bg-white">
+            <Search className="text-emerald-600" />
+            <div className="flex flex-col items-start">
+              <span className="text-sm font-bold">Where to?</span>
+              <span className="text-[11px] text-gray-500">
+                Anywhere • Any week • Add guests
+              </span>
+            </div>
           </Button>
         </div>
 
-        {/* 2. FILTER BUTTON (Standalone) */}
-        <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              onClick={() => setTempSelectedAmenities(selectedAmenities)}
-              className="rounded-full h-14 !px-6 border-gray-200 bg-white hover:bg-gray-50 shadow-md flex gap-2"
-            >
-              <SlidersHorizontal className="size-4" />
-              <span className="font-bold">Filters</span>
-              {selectedAmenities.length > 0 && (
-                <span className="bg-black text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
-                  {selectedAmenities.length}
-                </span>
-              )}
-            </Button>
-          </SheetTrigger>
-
-          <SheetContent className="flex flex-col h-full w-full sm:max-w-md p-0">
-            <SheetHeader className="p-6 border-b">
-              <SheetTitle className="text-xl font-bold">Filters</SheetTitle>
-            </SheetHeader>
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Amenities</h3>
-                <div className="space-y-4">
-                  {allAmenities.map((amenity) => (
-                    <div
-                      key={amenity.id}
-                      className="flex items-center justify-between cursor-pointer"
-                      onClick={() => toggleTempAmenity(amenity.id)}
-                    >
-                      <label className="text-sm font-medium leading-none cursor-pointer">
-                        {amenity.name}
-                      </label>
-                      <div
-                        className={cn(
-                          "w-6 h-6 rounded-md border flex items-center justify-center transition-colors",
-                          tempSelectedAmenities.includes(amenity.id)
-                            ? "bg-emerald-600 border-emerald-600"
-                            : "border-gray-300",
-                        )}
-                      >
-                        {tempSelectedAmenities.includes(amenity.id) && (
-                          <Check className="text-white size-4" />
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        {/* --- PROPERTY GRID --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+          {loading ? (
+            Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="bg-gray-200 aspect-square rounded-2xl mb-4" />
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-1/2" />
               </div>
+            ))
+          ) : properties.length > 0 ? (
+            properties.map((prop) => (
+              <PropertyCard key={prop.id} property={prop} />
+            ))
+          ) : (
+            <div className="col-span-full py-20 text-center">
+              <p className="text-xl font-semibold text-gray-900">
+                No properties found
+              </p>
+              <p className="text-gray-500">
+                Try adjusting your filters or search area.
+              </p>
             </div>
-            <div className="p-6 border-t bg-white flex items-center justify-between">
-              <button
-                onClick={() => setTempSelectedAmenities([])}
-                className="text-sm font-bold underline hover:text-gray-600"
-              >
-                Clear all
-              </button>
-              <Button
-                onClick={handleApplyFilters}
-                className="bg-black text-white px-8 rounded-lg h-12 hover:bg-zinc-800"
-              >
-                Show results
-              </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
-
-      {/* --- MOBILE SEARCH TRIGGER --- */}
-      <div className="md:hidden mb-8">
-        <Button className="w-full bg-white border border-gray-200 text-black shadow-md rounded-full py-6 flex justify-start px-6 gap-4 hover:bg-white">
-          <Search className="text-emerald-600" />
-          <div className="flex flex-col items-start">
-            <span className="text-sm font-bold">Where to?</span>
-            <span className="text-[11px] text-gray-500">
-              Anywhere • Any week • Add guests
-            </span>
-          </div>
-        </Button>
-      </div>
-
-      {/* --- PROPERTY GRID --- */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
-        {loading ? (
-          Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="bg-gray-200 aspect-square rounded-2xl mb-4" />
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-              <div className="h-4 bg-gray-200 rounded w-1/2" />
-            </div>
-          ))
-        ) : properties.length > 0 ? (
-          properties.map((prop) => (
-            <PropertyCard key={prop.id} property={prop} />
-          ))
-        ) : (
-          <div className="col-span-full py-20 text-center">
-            <p className="text-xl font-semibold text-gray-900">
-              No properties found
-            </p>
-            <p className="text-gray-500">
-              Try adjusting your filters or search area.
-            </p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 }
 
 // --- Sub-component: PropertyCard ---
