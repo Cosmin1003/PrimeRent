@@ -10,6 +10,7 @@ import {
   Star,
   Check,
   SlidersHorizontal,
+  ArrowUpDown,
 } from "lucide-react";
 import { format } from "date-fns";
 import { type DateRange } from "react-day-picker";
@@ -31,6 +32,7 @@ import {
   DialogTrigger,
   DialogHeader,
 } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 // --- Types ---
 interface Property {
@@ -60,6 +62,8 @@ export default function ExplorePage() {
     [],
   ); // Staging IDs
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const [sortBy, setSortBy] = useState<string>("default");
 
   // --- Search States ---
   const [location, setLocation] = useState("");
@@ -149,11 +153,45 @@ export default function ExplorePage() {
   // Check if any filter is currently active
   const isFiltered = location !== "" || guests > 1 || date?.from !== undefined;
 
+  const sortedProperties = [...properties].sort((a, b) => {
+    if (sortBy === "price-asc") return a.price_per_night - b.price_per_night;
+    if (sortBy === "price-desc") return b.price_per_night - a.price_per_night;
+    // If you add a rating column to your Property type later:
+    // if (sortBy === "rating") return b.rating - a.rating;
+    return 0; // default
+  });
+
   return (
     <div className="bg-white md:bg-gray-50 pt-15 pb-20">
       <div className="container max-w-7xl mx-auto px-4 md:px-6">
         {/* --- DESKTOP TOP BAR (Search + Filter Separated) --- */}
         <div className="hidden md:flex items-center justify-center gap-4 mb-12">
+          {/* --- SORT BUTTON --- */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="hidden md:flex rounded-full h-14 px-6! border-gray-200 bg-white hover:bg-gray-50 shadow-md gap-2"
+              >
+                <ArrowUpDown className="size-4" />
+                <span className="font-bold">Sort</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="rounded-2xl w-48 p-2">
+              <DropdownMenuItem onClick={() => setSortBy("default")}>
+                Default
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("price-asc")}>
+                Price: Low to High
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("price-desc")}>
+                Price: High to Low
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* 1. SEARCH BAR (The Pill) - your existing code follows... */}
+
           {/* 1. SEARCH BAR (The Pill) */}
           <div className="flex flex-1 bg-white p-2 rounded-full shadow-lg border border-gray-200 items-center max-w-4xl">
             {/* Location */}
@@ -410,8 +448,8 @@ export default function ExplorePage() {
                 <div className="h-4 bg-gray-200 rounded w-1/2" />
               </div>
             ))
-          ) : properties.length > 0 ? (
-            properties.map((prop) => (
+          ) : sortedProperties.length > 0 ? (
+            sortedProperties.map((prop) => (
               <PropertyCard key={prop.id} property={prop} />
             ))
           ) : (
