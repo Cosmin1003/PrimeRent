@@ -8,6 +8,8 @@ import {
   Calendar as CalendarIcon,
   MapPin,
   Star,
+  Check,
+  SlidersHorizontal,
 } from "lucide-react";
 import { format } from "date-fns";
 import { type DateRange } from "react-day-picker";
@@ -22,6 +24,13 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Minus, Plus } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 // --- Types ---
 interface Property {
@@ -32,12 +41,25 @@ interface Property {
   price_per_night: number;
   max_guests: number;
   main_image: string;
-  profiles: { full_name: string };
+  host_full_name: string;
+}
+
+interface Amenity {
+  id: string;
+  name: string;
+  icon_name: string | null;
 }
 
 export default function ExplorePage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [allAmenities, setAllAmenities] = useState<Amenity[]>([]);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]); // Final applied IDs
+  const [tempSelectedAmenities, setTempSelectedAmenities] = useState<string[]>(
+    [],
+  ); // Staging IDs
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // --- Search States ---
   const [location, setLocation] = useState("");
@@ -46,6 +68,19 @@ export default function ExplorePage() {
     from: undefined,
     to: undefined,
   });
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      const { data } = await supabase
+        .from("amenities")
+        .select("id, name, icon_name")
+        .order("name", { ascending: true });
+
+      if (data) setAllAmenities(data as Amenity[]);
+    };
+    fetchInitialData();
+    fetchProperties();
+  }, []);
 
   // --- Data Fetching ---
   const fetchProperties = async () => {
@@ -65,6 +100,7 @@ export default function ExplorePage() {
         p_guests: guests || 1,
         p_start_date: startDate,
         p_end_date: endDate,
+        p_amenities: selectedAmenities.length > 0 ? selectedAmenities : null,
       });
 
       if (error) throw error;
@@ -88,7 +124,18 @@ export default function ExplorePage() {
 
   useEffect(() => {
     fetchProperties();
-  }, []);
+  }, [selectedAmenities]);
+
+  const handleApplyFilters = () => {
+    setSelectedAmenities(tempSelectedAmenities);
+    setIsFilterOpen(false);
+  };
+
+  const toggleTempAmenity = (id: string) => {
+    setTempSelectedAmenities((prev) =>
+      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id],
+    );
+  };
 
   const resetFilters = () => {
     setLocation("");
@@ -103,11 +150,15 @@ export default function ExplorePage() {
   const isFiltered = location !== "" || guests > 1 || date?.from !== undefined;
 
   return (
-    <div className=" bg-white md:bg-gray-50 pt-15 pb-20">
-      <div className="container max-w-7xl mx-auto px-4 md:px-6">
-        {/* --- DESKTOP SEARCH BAR (3-PART PILL) --- */}
-        <div className="hidden md:flex bg-white p-2 rounded-full shadow-lg border border-gray-200 items-center max-w-4xl mx-auto mb-12">
-          {/* 1. Location */}
+  <div className="bg-white md:bg-gray-50 pt-15 pb-20">
+    <div className="container max-w-7xl mx-auto px-4 md:px-6">
+      
+      {/* --- DESKTOP TOP BAR (Search + Filter Separated) --- */}
+      <div className="hidden md:flex items-center justify-center gap-4 mb-12">
+        
+        {/* 1. SEARCH BAR (The Pill) */}
+        <div className="flex flex-1 bg-white p-2 rounded-full shadow-lg border border-gray-200 items-center max-w-4xl">
+          {/* Location */}
           <div className="flex flex-[1.2] items-center gap-3 px-6 py-2 border-r border-gray-200 group">
             <MapPin className="text-emerald-600 size-5" />
             <div className="flex flex-col w-full relative">
@@ -126,15 +177,14 @@ export default function ExplorePage() {
                     onClick={() => setLocation("")}
                     className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600"
                   >
-                    <Plus className="rotate-45 size-4" />{" "}
-                    {/* Rotating a plus makes an X */}
+                    <Plus className="rotate-45 size-4" />
                   </button>
                 )}
               </div>
             </div>
           </div>
 
-          {/* 2. Date Range Picker */}
+          {/* Date Range Picker */}
           <div className="flex-1 border-r border-gray-200">
             <Popover>
               <PopoverTrigger asChild>
@@ -181,14 +231,12 @@ export default function ExplorePage() {
                     date < new Date(new Date().setHours(0, 0, 0, 0))
                   }
                   classNames={{
-                    // Target the buttons inside the calendar using their data attributes
                     day: cn(
                       "[&_[data-range-start=true]]:!bg-emerald-600 [&_[data-range-start=true]]:!text-white",
                       "[&_[data-range-end=true]]:!bg-emerald-600 [&_[data-range-end=true]]:!text-white",
                       "[&_[data-range-middle=true]]:!bg-emerald-100 [&_[data-range-middle=true]]:!text-emerald-900",
                       "[&_[data-selected-single=true]]:!bg-emerald-600 [&_[data-selected-single=true]]:!text-white",
                     ),
-                    // Target the range background (the cell itself)
                     range_start: "!bg-emerald-600 !rounded-l-md",
                     range_end: "!bg-emerald-600 !rounded-r-md",
                     range_middle: "!bg-emerald-100",
@@ -198,21 +246,19 @@ export default function ExplorePage() {
             </Popover>
           </div>
 
-          {/* 3. Guests */}
+          {/* Guests */}
           <div className="flex flex-1 items-center gap-3 px-6 py-2">
             <Users className="text-emerald-600 size-5" />
             <div className="flex flex-col w-full">
               <span className="text-[10px] font-extrabold uppercase text-gray-500">
                 Who
               </span>
-
               <Popover>
                 <PopoverTrigger asChild>
                   <button className="text-sm font-semibold text-left hover:text-emerald-600 transition-colors">
                     {guests === 1 ? "1 guest" : `${guests} guests`}
                   </button>
                 </PopoverTrigger>
-
                 <PopoverContent className="w-72 p-6 rounded-3xl" align="end">
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
@@ -220,22 +266,17 @@ export default function ExplorePage() {
                         Number of Guests
                       </span>
                     </div>
-
                     <div className="flex items-center gap-4">
-                      {/* Decrement Button */}
                       <button
                         onClick={() => setGuests(Math.max(1, guests - 1))}
                         disabled={guests <= 1}
-                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black disabled:opacity-30 transition-all"
                       >
                         <Minus className="size-4" />
                       </button>
-
                       <span className="w-4 text-center font-semibold tabular-nums">
                         {guests}
                       </span>
-
-                      {/* Increment Button */}
                       <button
                         onClick={() => setGuests(guests + 1)}
                         className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black transition-all"
@@ -258,57 +299,126 @@ export default function ExplorePage() {
             </button>
           )}
 
-          {/* Search Button */}
           <Button
             onClick={fetchProperties}
             className="bg-emerald-600 hover:bg-emerald-700 rounded-full h-12 px-6 ml-2 transition-all active:scale-95"
           >
             <Search className="size-5 mr-2" />
-            <span className="font-bold mr-1">Search</span>
+            <span className="font-bold">Search</span>
           </Button>
         </div>
 
-        {/* --- MOBILE SEARCH TRIGGER (Simplified) --- */}
-        <div className="md:hidden mb-8">
-          <Button className="w-full bg-white border border-gray-200 text-black shadow-md rounded-full py-6 flex justify-start px-6 gap-4 hover:bg-white">
-            <Search className="text-emerald-600" />
-            <div className="flex flex-col items-start">
-              <span className="text-sm font-bold">Where to?</span>
-              <span className="text-[11px] text-gray-500">
-                Anywhere • Any week • Add guests
-              </span>
-            </div>
-          </Button>
-        </div>
+        {/* 2. FILTER BUTTON (Standalone) */}
+        <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              onClick={() => setTempSelectedAmenities(selectedAmenities)}
+              className="rounded-full h-14 px-6 border-gray-200 bg-white hover:bg-gray-50 shadow-md flex gap-2"
+            >
+              <SlidersHorizontal className="size-4" />
+              <span className="font-bold">Filters</span>
+              {selectedAmenities.length > 0 && (
+                <span className="bg-black text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
+                  {selectedAmenities.length}
+                </span>
+              )}
+            </Button>
+          </SheetTrigger>
 
-        {/* --- PROPERTY GRID --- */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
-          {loading ? (
-            Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="bg-gray-200 aspect-square rounded-2xl mb-4" />
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
+          <SheetContent className="flex flex-col h-full w-full sm:max-w-md p-0">
+            <SheetHeader className="p-6 border-b">
+              <SheetTitle className="text-xl font-bold">Filters</SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Amenities</h3>
+                <div className="space-y-4">
+                  {allAmenities.map((amenity) => (
+                    <div
+                      key={amenity.id}
+                      className="flex items-center justify-between cursor-pointer"
+                      onClick={() => toggleTempAmenity(amenity.id)}
+                    >
+                      <label className="text-sm font-medium leading-none cursor-pointer">
+                        {amenity.name}
+                      </label>
+                      <div
+                        className={cn(
+                          "w-6 h-6 rounded-md border flex items-center justify-center transition-colors",
+                          tempSelectedAmenities.includes(amenity.id)
+                            ? "bg-emerald-600 border-emerald-600"
+                            : "border-gray-300",
+                        )}
+                      >
+                        {tempSelectedAmenities.includes(amenity.id) && (
+                          <Check className="text-white size-4" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))
-          ) : properties.length > 0 ? (
-            properties.map((prop) => (
-              <PropertyCard key={prop.id} property={prop} />
-            ))
-          ) : (
-            <div className="col-span-full py-20 text-center">
-              <p className="text-xl font-semibold text-gray-900">
-                No properties found
-              </p>
-              <p className="text-gray-500">
-                Try adjusting your filters or search area.
-              </p>
             </div>
-          )}
-        </div>
+            <div className="p-6 border-t bg-white flex items-center justify-between">
+              <button
+                onClick={() => setTempSelectedAmenities([])}
+                className="text-sm font-bold underline hover:text-gray-600"
+              >
+                Clear all
+              </button>
+              <Button
+                onClick={handleApplyFilters}
+                className="bg-black text-white px-8 rounded-lg h-12 hover:bg-zinc-800"
+              >
+                Show results
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* --- MOBILE SEARCH TRIGGER --- */}
+      <div className="md:hidden mb-8">
+        <Button className="w-full bg-white border border-gray-200 text-black shadow-md rounded-full py-6 flex justify-start px-6 gap-4 hover:bg-white">
+          <Search className="text-emerald-600" />
+          <div className="flex flex-col items-start">
+            <span className="text-sm font-bold">Where to?</span>
+            <span className="text-[11px] text-gray-500">
+              Anywhere • Any week • Add guests
+            </span>
+          </div>
+        </Button>
+      </div>
+
+      {/* --- PROPERTY GRID --- */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+        {loading ? (
+          Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="bg-gray-200 aspect-square rounded-2xl mb-4" />
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+              <div className="h-4 bg-gray-200 rounded w-1/2" />
+            </div>
+          ))
+        ) : properties.length > 0 ? (
+          properties.map((prop) => (
+            <PropertyCard key={prop.id} property={prop} />
+          ))
+        ) : (
+          <div className="col-span-full py-20 text-center">
+            <p className="text-xl font-semibold text-gray-900">
+              No properties found
+            </p>
+            <p className="text-gray-500">
+              Try adjusting your filters or search area.
+            </p>
+          </div>
+        )}
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 // --- Sub-component: PropertyCard ---
@@ -345,7 +455,7 @@ function PropertyCard({ property }: { property: Property }) {
         {property.title}
       </p>
       <p className="text-gray-400 text-[14px]">
-        Hosted by {property.profiles?.full_name || "Host"}
+        Hosted by {property.host_full_name || "Host"}
       </p>
 
       <p className="mt-2 text-[15px]">
