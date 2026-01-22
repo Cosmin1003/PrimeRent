@@ -178,13 +178,13 @@ export default function ExplorePage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="rounded-2xl w-48 p-2">
-              <DropdownMenuItem onClick={() => setSortBy("default")}>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => setSortBy("default")}>
                 Default
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("price-asc")}>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => setSortBy("price-asc")}>
                 Price: Low to High
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("price-desc")}>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => setSortBy("price-desc")}>
                 Price: High to Low
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -211,7 +211,7 @@ export default function ExplorePage() {
                   {location && (
                     <button
                       onClick={() => setLocation("")}
-                      className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600"
+                      className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600 cursor-pointer"
                     >
                       <Plus className="rotate-45 size-4" />
                     </button>
@@ -224,7 +224,7 @@ export default function ExplorePage() {
             <div className="flex-1 border-r border-gray-200">
               <Popover>
                 <PopoverTrigger asChild>
-                  <button className="flex items-center gap-3 px-6 py-2 w-full text-left hover:bg-gray-50/50 rounded-none transition-colors">
+                  <button className="flex items-center gap-3 px-6 py-2 w-full text-left hover:bg-gray-50/50 rounded-none transition-colors cursor-pointer">
                     <CalendarIcon className="text-emerald-600 size-5" />
                     <div className="flex flex-col overflow-hidden">
                       <span className="text-[10px] font-extrabold uppercase text-gray-500">
@@ -296,7 +296,7 @@ export default function ExplorePage() {
                 </span>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className="text-sm font-semibold text-left hover:text-emerald-600 transition-colors">
+                    <button className="text-sm font-semibold text-left hover:text-emerald-600 transition-colors cursor-pointer">
                       {guests === 1 ? "1 guest" : `${guests} guests`}
                     </button>
                   </PopoverTrigger>
@@ -311,7 +311,7 @@ export default function ExplorePage() {
                         <button
                           onClick={() => setGuests(Math.max(1, guests - 1))}
                           disabled={guests <= 1}
-                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black disabled:opacity-30 transition-all"
+                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black disabled:opacity-30 transition-all enabled:cursor-pointer disabled:cursor-not-allowed"
                         >
                           <Minus className="size-4" />
                         </button>
@@ -320,7 +320,7 @@ export default function ExplorePage() {
                         </span>
                         <button
                           onClick={() => setGuests(guests + 1)}
-                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black transition-all"
+                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black transition-all cursor-pointer"
                         >
                           <Plus className="size-4" />
                         </button>
@@ -336,7 +336,7 @@ export default function ExplorePage() {
               {isFiltered && (
                 <button
                   onClick={resetFilters}
-                  className="absolute -left-20 text-xs font-bold text-gray-500 hover:text-black underline underline-offset-4 transition-colors whitespace-nowrap"
+                  className="absolute py-2 -left-20 text-xs font-bold text-gray-500 hover:text-black underline underline-offset-4 transition-colors whitespace-nowrap cursor-pointer"
                 >
                   Clear all
                 </button>
@@ -410,7 +410,7 @@ export default function ExplorePage() {
               <div className="p-4 border-t bg-white flex items-center justify-between px-6">
                 <button
                   onClick={() => setTempSelectedAmenities([])}
-                  className="text-sm font-bold underline"
+                  className="text-sm font-bold underline cursor-pointer"
                 >
                   Clear all
                 </button>
