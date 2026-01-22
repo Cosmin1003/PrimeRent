@@ -314,7 +314,7 @@ export default function ExplorePage() {
             <Button
               variant="outline"
               onClick={() => setTempSelectedAmenities(selectedAmenities)}
-              className="rounded-full h-14 px-6 border-gray-200 bg-white hover:bg-gray-50 shadow-md flex gap-2"
+              className="rounded-full h-14 !px-6 border-gray-200 bg-white hover:bg-gray-50 shadow-md flex gap-2"
             >
               <SlidersHorizontal className="size-4" />
               <span className="font-bold">Filters</span>
