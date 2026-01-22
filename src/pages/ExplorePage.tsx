@@ -32,25 +32,14 @@ import {
   DialogTrigger,
   DialogHeader,
 } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-// --- Types ---
-interface Property {
-  id: string;
-  title: string;
-  city: string;
-  address: string;
-  price_per_night: number;
-  max_guests: number;
-  main_image: string;
-  host_full_name: string;
-}
-
-interface Amenity {
-  id: string;
-  name: string;
-  icon_name: string | null;
-}
+import type { Property, Amenity } from "../types/property";
 
 export default function ExplorePage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -111,10 +100,7 @@ export default function ExplorePage() {
 
       // 3. Map the flat SQL response back to your React Component's expected structure
       const formattedData = data.map((item: any) => ({
-        ...item, // This includes id, title, city, address, price, image
-        profiles: {
-          full_name: item.host_full_name, // Map the flat SQL column to the nested object
-        },
+        ...item,
       }));
 
       setProperties(formattedData);
@@ -178,13 +164,22 @@ export default function ExplorePage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="rounded-2xl w-48 p-2">
-              <DropdownMenuItem className="cursor-pointer" onClick={() => setSortBy("default")}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setSortBy("default")}
+              >
                 Default
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" onClick={() => setSortBy("price-asc")}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setSortBy("price-asc")}
+              >
                 Price: Low to High
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" onClick={() => setSortBy("price-desc")}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setSortBy("price-desc")}
+              >
                 Price: High to Low
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -494,7 +489,9 @@ function PropertyCard({ property }: { property: Property }) {
         </h3>
         <div className="flex items-center gap-1 text-sm font-medium">
           <Star className="size-3 fill-black" />
-          <span>4.92</span>
+          <span>
+            {property.avg_rating > 0 ? property.avg_rating.toFixed(2) : "New"}
+          </span>
         </div>
       </div>
 
