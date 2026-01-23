@@ -9,6 +9,9 @@ export interface Property {
   main_image: string;
   host_full_name: string;
   avg_rating: number;
+  bedrooms: number;
+  beds: number;
+  bathrooms: number;
 }
 
 export interface Amenity {
