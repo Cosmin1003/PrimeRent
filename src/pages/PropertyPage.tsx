@@ -311,7 +311,7 @@ export default function PropertyPage() {
                   <DialogTrigger asChild>
                     <ShadButton
                       variant="outline"
-                      className="mt-1 border-black font-bold px-6 h-12 rounded-xl hover:bg-gray-50"
+                      className="mt-5 border-black font-bold px-6 h-12 rounded-xl hover:bg-gray-50"
                     >
                       Show all {amenities.length} amenities
                     </ShadButton>
