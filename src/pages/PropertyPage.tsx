@@ -123,6 +123,25 @@ export default function PropertyPage() {
     );
   }
 
+  const handleShare = async () => {
+    const shareData = {
+      title: property?.title || "Check out this stay!",
+      text: `Take a look at ${property?.title} in ${property?.city}`,
+      url: window.location.href, // Current page URL
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert("Link copied to clipboard!");
+      }
+    } catch (err) {
+      console.error("Error sharing:", err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Mobile Top Bar */}
@@ -145,7 +164,7 @@ export default function PropertyPage() {
         <div className="hidden md:block mb-6">
           <h1 className="text-2xl font-bold text-gray-900">{property.title}</h1>
           <div className="flex justify-between items-center mt-2">
-            <div className="flex items-center gap-4 text-sm font-semibold underline">
+            <div className="flex items-center gap-4 text-sm font-semibold">
               <div className="flex items-center gap-1">
                 <Star className="size-4 fill-black" />
                 <span>
@@ -158,18 +177,19 @@ export default function PropertyPage() {
                 {property.city}, {property.address}
               </span>
             </div>
-            <div className="flex gap-4">
+            <div className="flex gap-6">
               <ShadButton
                 variant="ghost"
-                className="underline font-bold text-sm"
+                className="font-bold text-sm"
+                onClick={handleShare}
               >
-                <Share className="size-4 mr-2" /> Share
+                <Share className="size-4 mr-1" /> Share
               </ShadButton>
               <ShadButton
                 variant="ghost"
-                className="underline font-bold text-sm"
+                className="font-bold text-sm"
               >
-                <Heart className="size-4 mr-2" /> Save
+                <Heart className="size-4 mr-1" /> Save
               </ShadButton>
             </div>
           </div>
