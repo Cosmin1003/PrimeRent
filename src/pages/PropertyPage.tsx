@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "../supabaseClient";
 import {
   Star,
@@ -41,6 +41,11 @@ export default function PropertyPage() {
 
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
+
+  const reviewsRef = useRef<HTMLDivElement>(null);
+  const scrollToReviews = () => {
+    reviewsRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     async function fetchPropertyData() {
@@ -142,8 +147,11 @@ export default function PropertyPage() {
     }
   };
 
+  
+
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-00">
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between p-4 sticky top-0 bg-white z-50 border-b">
         <ShadButton variant="ghost" size="icon" onClick={() => navigate(-1)}>
@@ -165,7 +173,7 @@ export default function PropertyPage() {
           <h1 className="text-2xl font-bold text-gray-900">{property.title}</h1>
           <div className="flex justify-between items-center mt-2">
             <div className="flex items-center gap-4 text-sm font-semibold">
-              <div className="flex items-center gap-1">
+              <div onClick={scrollToReviews} className="flex items-center gap-1 cursor-pointer" >
                 <Star className="size-4 fill-black" />
                 <span>
                   {property.avg_rating > 0
@@ -441,7 +449,7 @@ export default function PropertyPage() {
       </div>
 
       {/* Reviews Section */}
-      <div className="container max-w-6xl mx-auto px-4 md:px-6">
+      <div className="container max-w-6xl mx-auto px-4 md:px-6 scroll-mt-20" ref={reviewsRef}>
         <Separator className="my-12" />
 
         <section className="pb-12">
