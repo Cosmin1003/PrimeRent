@@ -39,7 +39,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import type { Property, Amenity } from "../types/property";
+import type { Property } from "../types/property";
+import type { Amenity } from "@/types/amenities";
 import { Link } from "react-router-dom";
 
 export default function ExplorePage() {

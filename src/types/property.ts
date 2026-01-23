@@ -13,8 +13,3 @@ export interface Property {
   beds: number;
   bathrooms: number;
 }
-
-export interface Amenity {
-  id: string;
-  name: string;
-}
