@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import type { Property } from "../types/property";
-import type { Amenity } from "@/types/amenities";
+import type { Amenity } from "@/types/amenity";
 import { Link } from "react-router-dom";
 
 export default function ExplorePage() {

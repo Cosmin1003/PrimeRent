@@ -18,8 +18,8 @@ import { Separator } from "@/components/ui/separator";
 
 // Types
 import type { Property } from "../types/property";
-import type { Amenity } from "@/types/amenities";
-import { getAmenityDetails } from "@/types/amenities";
+import type { Amenity } from "@/types/amenity";
+import { getAmenityDetails } from "@/types/amenity";
 
 import {
   Dialog,
@@ -28,65 +28,77 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import type { Review } from "@/types/review";
 
 export default function PropertyPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [property, setProperty] = useState<Property | null>(null);
   const [amenities, setAmenities] = useState<Amenity[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [guestCount, setGuestCount] = useState(1);
+
   const [showAllAmenities, setShowAllAmenities] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   useEffect(() => {
     async function fetchPropertyData() {
       setLoading(true);
       try {
-        // 1. Fetch main property data
+        // 1. Fetch Property + Host Info
         const { data: propData, error: propError } = await supabase
           .from("properties")
-          .select(
-            `
-            *,
-            profiles (
-              full_name
-            )
-          `,
-          )
+          .select(`*, profiles ( full_name )`)
           .eq("id", id)
           .single();
 
         if (propError) throw propError;
 
-        // 2. Fetch linked amenities
+        // 2. Fetch Amenities
         const { data: amData } = await supabase
           .from("property_amenities")
-          .select(
-            `
-            amenities (
-              id,
-              name
-            )
-          `,
-          )
+          .select(`amenities ( id, name )`)
           .eq("property_id", id);
 
-        const formattedProperty = {
+        // 3. Fetch Reviews + Reviewer Profile info
+        const { data: revData, error: revError } = await supabase
+          .from("reviews")
+          .select(
+            `
+          *,
+          profiles (
+            full_name,
+            avatar_url
+          )
+        `,
+          )
+          .eq("property_id", id)
+          .order("created_at", { ascending: false });
+
+        if (revError) throw revError;
+
+        // Calculate average rating
+        const avgRating =
+          revData && revData.length > 0
+            ? revData.reduce((acc, item) => acc + item.rating, 0) /
+              revData.length
+            : 0;
+
+        setProperty({
           ...propData,
           host_full_name: propData.profiles?.full_name || "Host",
-        };
+          avg_rating: avgRating, // Override with calculated rating
+        });
 
-        setProperty(formattedProperty);
-        if (amData) {
-          setAmenities(amData.map((item: any) => item.amenities));
-        }
+        setReviews(revData || []);
+        if (amData) setAmenities(amData.map((item: any) => item.amenities));
       } catch (err) {
-        console.error("Error fetching property:", err);
+        console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
       }
     }
-
     if (id) fetchPropertyData();
   }, [id]);
 
@@ -138,7 +150,7 @@ export default function PropertyPage() {
                 <Star className="size-4 fill-black" />
                 <span>
                   {property.avg_rating > 0
-                    ? property.avg_rating.toFixed(2)
+                    ? `${property.avg_rating.toFixed(2)} (${reviews.length})`
                     : "New"}
                 </span>
               </div>
@@ -279,7 +291,7 @@ export default function PropertyPage() {
                   <DialogTrigger asChild>
                     <ShadButton
                       variant="outline"
-                      className="mt-5 border-black font-bold px-6 h-12 rounded-xl hover:bg-gray-50"
+                      className="mt-1 border-black font-bold px-6 h-12 rounded-xl hover:bg-gray-50"
                     >
                       Show all {amenities.length} amenities
                     </ShadButton>
@@ -406,6 +418,147 @@ export default function PropertyPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="container max-w-6xl mx-auto px-4 md:px-6">
+        <Separator className="my-12" />
+
+        <section className="pb-12">
+          {/* Header with Star and Total Count */}
+          <div className="flex items-center gap-2 text-2xl font-bold mb-8">
+            <Star className="size-6 fill-black" />
+            <span>
+              {property.avg_rating > 0 ? property.avg_rating.toFixed(2) : "New"}
+            </span>
+            <span>•</span>
+            <span>
+              {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+            </span>
+          </div>
+
+          {/* 2x2 Grid for the first 4 reviews */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10">
+            {reviews.length > 0 ? (
+              reviews.slice(0, 4).map((review) => (
+                <div key={review.id} className="space-y-3">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                      <img
+                        src={
+                          review.profiles.avatar_url ||
+                          `https://ui-avatars.com/api/?name=${review.profiles.full_name}`
+                        }
+                        alt={review.profiles.full_name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-bold">{review.profiles.full_name}</h4>
+                      <p className="text-sm text-gray-500">
+                        {new Date(review.created_at).toLocaleDateString(
+                          "en-US",
+                          { month: "long", year: "numeric" },
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`size-3 ${i < review.rating ? "fill-black" : "text-gray-300"}`}
+                      />
+                    ))}
+                  </div>
+
+                  <p className="text-gray-700 leading-relaxed line-clamp-3">
+                    {review.comment}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 italic">
+                No reviews yet for this property.
+              </p>
+            )}
+          </div>
+
+          {/* "Show All Reviews" Dialog Logic */}
+          {reviews.length > 4 && (
+            <Dialog open={showAllReviews} onOpenChange={setShowAllReviews}>
+              <DialogTrigger asChild>
+                <ShadButton
+                  variant="outline"
+                  className="mt-5 border-black font-bold px-6 h-12 rounded-xl hover:bg-gray-50"
+                >
+                  Show all {reviews.length} reviews
+                </ShadButton>
+              </DialogTrigger>
+
+              <DialogContent className="max-w-3xl! h-[75vh] p-0 overflow-hidden rounded-3xl flex flex-col border-none shadow-2xl">
+                {/* Sticky Header with Average Rating */}
+                <DialogHeader className="p-8 pb-6 border-b flex-shrink-0 bg-white">
+                  <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                    <Star className="size-6 fill-black" />
+                    {property.avg_rating > 0
+                      ? property.avg_rating.toFixed(2)
+                      : "New"}{" "}
+                    · {reviews.length} reviews
+                  </DialogTitle>
+                </DialogHeader>
+
+                {/* Scrollable Review List */}
+                <div className="flex-1 overflow-y-auto p-8 pt-4 mb-5">
+                  <div className="space-y-10">
+                    {reviews.map((review) => (
+                      <div key={review.id} className="space-y-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                            <img
+                              src={
+                                review.profiles.avatar_url ||
+                                `https://ui-avatars.com/api/?name=${review.profiles.full_name}`
+                              }
+                              alt={review.profiles.full_name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-lg">
+                              {review.profiles.full_name}
+                            </h4>
+                            <p className="text-sm text-gray-500">
+                              {new Date(review.created_at).toLocaleDateString(
+                                "en-US",
+                                { month: "long", year: "numeric" },
+                              )}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`size-3 ${i < review.rating ? "fill-black" : "text-gray-300"}`}
+                            />
+                          ))}
+                        </div>
+
+                        <p className="text-gray-700 leading-relaxed">
+                          {review.comment}
+                        </p>
+                        <Separator className="mt-8" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+        </section>
       </div>
     </div>
   );
