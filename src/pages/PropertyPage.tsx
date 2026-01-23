@@ -21,8 +21,13 @@ import type { Property } from "../types/property";
 import type { Amenity } from "@/types/amenities";
 import { getAmenityDetails } from "@/types/amenities";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function PropertyPage() {
   const { id } = useParams();
@@ -280,31 +285,38 @@ export default function PropertyPage() {
                     </ShadButton>
                   </DialogTrigger>
 
-                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto rounded-3xl p-0">
-                    <DialogHeader className="p-6 border-b sticky top-0 bg-white z-10">
-                      <DialogTitle className="text-2xl font-bold">
+                  {/* Updated Dialog: p-0 and overflow-hidden are key here */}
+                  <DialogContent className="max-w-2xl h-[75vh] p-0 overflow-hidden rounded-3xl flex flex-col border-none shadow-2xl">
+                    {/* 1. Sticky Header - stays at the top while you scroll the list */}
+                    <DialogHeader className="p-8 pb-6 border-b flex-shrink-0 bg-white">
+                      <DialogTitle className="text-2xl font-bold text-gray-900">
                         What this place offers
                       </DialogTitle>
                     </DialogHeader>
 
-                    <div className="p-8 space-y-8">
-                      {amenities.map((am) => {
-                        const details = getAmenityDetails(am.name);
-                        return (
-                          <div
-                            key={am.id}
-                            className="flex gap-6 items-start pb-6 border-b last:border-0"
-                          >
-                            <details.icon className="size-7 text-[#0bad7b]" />
-                            <div>
-                              <h4 className="text-lg font-medium text-gray-900">
-                                {am.name}
-                              </h4>
-                              <p className="text-gray-500">{details.desc}</p>
+                    {/* 2. Scrollable Body - This is the only part that scrolls */}
+                    <div className="flex-1 overflow-y-auto pl-6 pt-2 mb-4">
+                      <div className="space-y-8">
+                        {amenities.map((am) => {
+                          const details = getAmenityDetails(am.name);
+                          return (
+                            <div
+                              key={am.id}
+                              className="flex gap-6 items-start pb-6 border-b border-gray-100 last:border-0"
+                            >
+                              <details.icon className="size-7 text-[#0bad7b] flex-shrink-0" />
+                              <div>
+                                <h4 className="text-m font-medium text-gray-900">
+                                  {am.name}
+                                </h4>
+                                <p className="text-gray-500 leading-relaxed">
+                                  {details.desc}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
                   </DialogContent>
                 </Dialog>
