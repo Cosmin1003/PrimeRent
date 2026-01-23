@@ -20,6 +20,42 @@ import { Separator } from "@/components/ui/separator";
 // Types
 import type { Property, Amenity } from "../types/property";
 
+import { Wifi, Tv, Wind, Car, Coffee, Utensils } from "lucide-react";
+
+const getAmenityDetails = (name: string) => {
+  const map: Record<string, { icon: any; desc: string }> = {
+    Wifi: {
+      icon: Wifi,
+      desc: "Fast and reliable connection, suitable for video calls.",
+    },
+    TV: { icon: Tv, desc: "Standard cable or streaming services available." },
+    "Air conditioning": {
+      icon: Wind,
+      desc: "Maintain a cool environment throughout your stay.",
+    },
+    "Free parking": {
+      icon: Car,
+      desc: "Dedicated space for your vehicle on the premises.",
+    },
+    Kitchen: {
+      icon: Utensils,
+      desc: "Space where guests can cook their own meals.",
+    },
+    "Coffee maker": {
+      icon: Coffee,
+      desc: "Start your morning with a fresh brew.",
+    },
+  };
+
+  // Default fallback if amenity name doesn't match the map
+  return (
+    map[name] || {
+      icon: ShieldCheck,
+      desc: "High-quality amenity provided for your comfort.",
+    }
+  );
+};
+
 export default function PropertyPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -55,8 +91,7 @@ export default function PropertyPage() {
             `
             amenities (
               id,
-              name,
-              icon_name
+              name
             )
           `,
           )
@@ -204,6 +239,7 @@ export default function PropertyPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mt-8">
           {/* Main Info */}
           <div className="md:col-span-2">
+            {/* 1. Host & Room Info */}
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-bold">
@@ -229,29 +265,7 @@ export default function PropertyPage() {
 
             <Separator className="my-8" />
 
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <MapPin className="size-6 mt-1" />
-                <div>
-                  <h4 className="font-bold">Great location</h4>
-                  <p className="text-sm text-gray-500">
-                    Every guest has given the location here a 5-star rating.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <ShieldCheck className="size-6 mt-1" />
-                <div>
-                  <h4 className="font-bold">Self check-in</h4>
-                  <p className="text-sm text-gray-500">
-                    Check yourself in with the smart lock.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <Separator className="my-8" />
-
+            {/* 2. Description (Now moved directly under Info) */}
             <div>
               <h3 className="text-xl font-bold mb-4">About this space</h3>
               <p className="text-gray-700 leading-relaxed">
@@ -262,25 +276,21 @@ export default function PropertyPage() {
 
             <Separator className="my-8" />
 
-            {/* Amenities Section */}
-            <div>
-              <h3 className="text-xl font-bold mb-6">What this place offers</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4">
-                {amenities.length > 0 ? (
-                  amenities.map((am) => (
-                    <div
-                      key={am.id}
-                      className="flex items-center gap-4 text-gray-700"
-                    >
-                      <span className="text-sm font-medium">{am.name}</span>
+            {/* 3. High-Detail Amenities List */}
+            <div className="space-y-6">
+              {/* Dynamic Amenities from DB with Hardcoded Details */}
+              {amenities.map((am) => {
+                const details = getAmenityDetails(am.name);
+                return (
+                  <div key={am.id} className="flex gap-4">
+                    <details.icon className="size-6 mt-1 text-gray-700" />
+                    <div>
+                      <h4 className="font-bold">{am.name}</h4>
+                      <p className="text-sm text-gray-500">{details.desc}</p>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500 text-sm">
-                    Contact host for amenity details.
-                  </p>
-                )}
-              </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

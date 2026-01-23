@@ -67,7 +67,7 @@ export default function ExplorePage() {
     const fetchInitialData = async () => {
       const { data } = await supabase
         .from("amenities")
-        .select("id, name, icon_name")
+        .select("id, name")
         .order("name", { ascending: true });
 
       if (data) setAllAmenities(data as Amenity[]);

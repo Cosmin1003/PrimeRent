@@ -17,5 +17,4 @@ export interface Property {
 export interface Amenity {
   id: string;
   name: string;
-  icon_name: string | null;
 }
