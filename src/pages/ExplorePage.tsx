@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import type { Property, Amenity } from "../types/property";
+import { Link } from "react-router-dom";
 
 export default function ExplorePage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -466,46 +467,51 @@ export default function ExplorePage() {
 // --- Sub-component: PropertyCard ---
 function PropertyCard({ property }: { property: Property }) {
   return (
-    <div className="group cursor-pointer flex flex-col">
-      {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden rounded-xl mb-3 shadow-sm">
-        <img
-          src={
-            property.main_image ||
-            "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=2070&auto=format&fit=crop"
-          }
-          alt={property.title}
-          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-        />
-        <button className="absolute top-3 right-3 p-2 rounded-full bg-black/10 backdrop-blur-md hover:bg-black/20 transition">
-          <Star className="size-4 text-white fill-white/20" />
-        </button>
-      </div>
-
-      {/* Info */}
-      <div className="flex justify-between items-start leading-tight">
-        <h3 className="font-bold text-[15px] text-gray-900 truncate">
-          {property.city}, {property.address}
-        </h3>
-        <div className="flex items-center gap-1 text-sm font-medium">
-          <Star className="size-3 fill-black" />
-          <span>
-            {property.avg_rating > 0 ? property.avg_rating.toFixed(2) : "New"}
-          </span>
+    <Link
+      to={`/explore/${property.id}`}
+      className="group cursor-pointer flex flex-col"
+    >
+      <div className="group cursor-pointer flex flex-col">
+        {/* Image Container */}
+        <div className="relative aspect-square overflow-hidden rounded-xl mb-3 shadow-sm">
+          <img
+            src={
+              property.main_image ||
+              "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=2070&auto=format&fit=crop"
+            }
+            alt={property.title}
+            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+          />
+          <button className="absolute top-3 right-3 p-2 rounded-full bg-black/10 backdrop-blur-md hover:bg-black/20 transition">
+            <Star className="size-4 text-white fill-white/20" />
+          </button>
         </div>
+
+        {/* Info */}
+        <div className="flex justify-between items-start leading-tight">
+          <h3 className="font-bold text-[15px] text-gray-900 truncate">
+            {property.city}, {property.address}
+          </h3>
+          <div className="flex items-center gap-1 text-sm font-medium">
+            <Star className="size-3 fill-black" />
+            <span>
+              {property.avg_rating > 0 ? property.avg_rating.toFixed(2) : "New"}
+            </span>
+          </div>
+        </div>
+
+        <p className="text-gray-500 text-[14px] mt-0.5 truncate">
+          {property.title}
+        </p>
+        <p className="text-gray-400 text-[14px]">
+          Hosted by {property.host_full_name || "Host"}
+        </p>
+
+        <p className="mt-2 text-[15px]">
+          <span className="font-bold">${property.price_per_night}</span>
+          <span className="text-gray-600 font-normal"> night</span>
+        </p>
       </div>
-
-      <p className="text-gray-500 text-[14px] mt-0.5 truncate">
-        {property.title}
-      </p>
-      <p className="text-gray-400 text-[14px]">
-        Hosted by {property.host_full_name || "Host"}
-      </p>
-
-      <p className="mt-2 text-[15px]">
-        <span className="font-bold">${property.price_per_night}</span>
-        <span className="text-gray-600 font-normal"> night</span>
-      </p>
-    </div>
+    </Link>
   );
 }
