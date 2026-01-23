@@ -9,7 +9,6 @@ import {
   Share,
   Heart,
   ChevronLeft,
-  ShieldCheck,
   Minus,
   Plus,
 } from "lucide-react";
@@ -20,30 +19,104 @@ import { Separator } from "@/components/ui/separator";
 // Types
 import type { Property, Amenity } from "../types/property";
 
-import { Wifi, Tv, Wind, Car, Coffee, Utensils } from "lucide-react";
+import {
+  Wifi,
+  Tv,
+  Wind,
+  Car,
+  Coffee,
+  Utensils,
+  ShieldCheck,
+  Waves,
+  Dumbbell,
+  Flame,
+  Baby,
+  PawPrint,
+  Laptop,
+  Bath,
+  WashingMachine,
+  Refrigerator,
+  Microwave,
+  Key,
+  PocketKnife,
+  Flower2,
+  Thermometer,
+} from "lucide-react";
 
 const getAmenityDetails = (name: string) => {
   const map: Record<string, { icon: any; desc: string }> = {
-    Wifi: {
-      icon: Wifi,
-      desc: "Fast and reliable connection, suitable for video calls.",
-    },
-    TV: { icon: Tv, desc: "Standard cable or streaming services available." },
+    // Basic Essentials
+    Wifi: { icon: Wifi, desc: "High-speed internet throughout the property." },
+    TV: { icon: Tv, desc: "Smart TV with access to popular streaming apps." },
     "Air conditioning": {
       icon: Wind,
-      desc: "Maintain a cool environment throughout your stay.",
+      desc: "Central or unit cooling for your comfort.",
     },
-    "Free parking": {
-      icon: Car,
-      desc: "Dedicated space for your vehicle on the premises.",
-    },
+    Heating: { icon: Thermometer, desc: "Keep warm during the cooler months." },
     Kitchen: {
       icon: Utensils,
-      desc: "Space where guests can cook their own meals.",
+      desc: "Fully equipped space for meal preparation.",
     },
+
+    // Parking & Entry
+    "Free parking": {
+      icon: Car,
+      desc: "On-site parking available at no extra cost.",
+    },
+    "Self check-in": {
+      icon: Key,
+      desc: "Check yourself in using a secure keypad or lockbox.",
+    },
+
+    // Laundry & Cleaning
+    Washer: {
+      icon: WashingMachine,
+      desc: "In-unit laundry facilities for long-term stays.",
+    },
+    Dryer: {
+      icon: WashingMachine,
+      desc: "Standard drying machine available for guest use.",
+    },
+    Iron: { icon: PocketKnife, desc: "Professional iron and board provided." },
+
+    // Cooking & Appliances
     "Coffee maker": {
       icon: Coffee,
-      desc: "Start your morning with a fresh brew.",
+      desc: "Brew your favorite beans every morning.",
+    },
+    Refrigerator: {
+      icon: Refrigerator,
+      desc: "Full-sized fridge to keep your groceries fresh.",
+    },
+    Microwave: { icon: Microwave, desc: "For quick meal heating and snacks." },
+
+    // Lifestyle & Facilities
+    "Dedicated workspace": {
+      icon: Laptop,
+      desc: "A desk or table with comfortable seating for work.",
+    },
+    Pool: { icon: Waves, desc: "Access to a private or shared swimming pool." },
+    Gym: {
+      icon: Dumbbell,
+      desc: "On-site fitness equipment for your workouts.",
+    },
+    Backyard: {
+      icon: Flower2,
+      desc: "Private outdoor space with greenery or seating.",
+    },
+
+    // Policies & Safety
+    "Pet friendly": {
+      icon: PawPrint,
+      desc: "Your furry friends are welcome to join you.",
+    },
+    "Family friendly": {
+      icon: Baby,
+      desc: "Equipment and layout suitable for children.",
+    },
+    "Fire extinguisher": {
+      icon: Flame,
+      desc: "Safety equipment located in an accessible area.",
     },
   };
 
@@ -51,7 +124,7 @@ const getAmenityDetails = (name: string) => {
   return (
     map[name] || {
       icon: ShieldCheck,
-      desc: "High-quality amenity provided for your comfort.",
+      desc: "Quality amenity verified and provided by the host.",
     }
   );
 };
@@ -63,6 +136,7 @@ export default function PropertyPage() {
   const [amenities, setAmenities] = useState<Amenity[]>([]);
   const [loading, setLoading] = useState(true);
   const [guestCount, setGuestCount] = useState(1);
+  const [showAllAmenities, setShowAllAmenities] = useState(false);
 
   useEffect(() => {
     async function fetchPropertyData() {
