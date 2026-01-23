@@ -42,6 +42,7 @@ import {
   Flower2,
   Thermometer,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const getAmenityDetails = (name: string) => {
   const map: Record<string, { icon: any; desc: string }> = {
@@ -351,20 +352,69 @@ export default function PropertyPage() {
             <Separator className="my-8" />
 
             {/* 3. High-Detail Amenities List */}
-            <div className="space-y-6">
-              {/* Dynamic Amenities from DB with Hardcoded Details */}
-              {amenities.map((am) => {
-                const details = getAmenityDetails(am.name);
-                return (
-                  <div key={am.id} className="flex gap-4">
-                    <details.icon className="size-6 mt-1 text-gray-700" />
-                    <div>
-                      <h4 className="font-bold">{am.name}</h4>
-                      <p className="text-sm text-gray-500">{details.desc}</p>
+            <div className="mt-8">
+              <h3 className="text-xl font-bold mb-6">What this place offers</h3>
+
+              {/* 2-Column Grid for first 6 items */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-12">
+                {amenities.slice(0, 6).map((am) => {
+                  const details = getAmenityDetails(am.name);
+                  return (
+                    <div key={am.id} className="flex gap-4">
+                      <details.icon className="size-6 mt-1 text-[#0bad7b]" />
+                      <div>
+                        <h4 className="font-bold">{am.name}</h4>
+                        <p className="text-sm text-gray-500">{details.desc}</p>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+
+              {/* "Show All" Button Trigger */}
+              {amenities.length > 6 && (
+                <Dialog
+                  open={showAllAmenities}
+                  onOpenChange={setShowAllAmenities}
+                >
+                  <DialogTrigger asChild>
+                    <ShadButton
+                      variant="outline"
+                      className="mt-5 border-black font-bold px-6 h-12 rounded-xl hover:bg-gray-50"
+                    >
+                      Show all {amenities.length} amenities
+                    </ShadButton>
+                  </DialogTrigger>
+
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto rounded-3xl p-0">
+                    <DialogHeader className="p-6 border-b sticky top-0 bg-white z-10">
+                      <DialogTitle className="text-2xl font-bold">
+                        What this place offers
+                      </DialogTitle>
+                    </DialogHeader>
+
+                    <div className="p-8 space-y-8">
+                      {amenities.map((am) => {
+                        const details = getAmenityDetails(am.name);
+                        return (
+                          <div
+                            key={am.id}
+                            className="flex gap-6 items-start pb-6 border-b last:border-0"
+                          >
+                            <details.icon className="size-7 text-[#0bad7b]" />
+                            <div>
+                              <h4 className="text-lg font-medium text-gray-900">
+                                {am.name}
+                              </h4>
+                              <p className="text-gray-500">{details.desc}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
           </div>
 
