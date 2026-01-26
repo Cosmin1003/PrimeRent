@@ -481,12 +481,12 @@ export default function PropertyPage() {
 
         <section className="pb-12">
           {/* Header with Star and Total Count */}
-          <div className="flex items-center gap-2 text-2xl font-bold mb-8">
-            <Star className="size-6 fill-black" />
-            <span>
+          <div className="flex items-center gap-2 text-2xl font-bold mb-8 text-emerald-700">
+            <Star className="size-6 fill-emerald-600 text-emerald-600" />
+            <span >
               {property.avg_rating > 0 ? property.avg_rating.toFixed(2) : "New"}
             </span>
-            <span>•</span>
+            <span className="text-emerald-600">•</span>
             <span>
               {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
             </span>
@@ -523,7 +523,7 @@ export default function PropertyPage() {
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`size-3 ${i < review.rating ? "fill-black" : "text-gray-300"}`}
+                        className={`size-3 ${i < review.rating ? "fill-emerald-600 text-emerald-600" : "text-gray-300"}`}
                       />
                     ))}
                   </div>
@@ -554,13 +554,13 @@ export default function PropertyPage() {
 
               <DialogContent className="max-w-3xl! h-[75vh] p-0 overflow-hidden rounded-3xl flex flex-col border-none shadow-2xl">
                 {/* Sticky Header with Average Rating */}
-                <DialogHeader className="p-8 pb-6 border-b flex-shrink-0 bg-white">
+                <DialogHeader className="p-8 pb-6 border-b flex-shrink-0 bg-white text-emerald-700">
                   <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                    <Star className="size-6 fill-black" />
+                    <Star className="size-6 fill-emerald-600 text-emerald-600" />
                     {property.avg_rating > 0
                       ? property.avg_rating.toFixed(2)
                       : "New"}{" "}
-                    · {reviews.length} reviews
+                    <span className="text-emerald-600">·</span> {reviews.length} reviews
                   </DialogTitle>
                 </DialogHeader>
 
@@ -597,7 +597,7 @@ export default function PropertyPage() {
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`size-3 ${i < review.rating ? "fill-black" : "text-gray-300"}`}
+                              className={`size-3 ${i < review.rating ? "fill-emerald-600 text-emerald-600" : "text-gray-300"}`}
                             />
                           ))}
                         </div>
