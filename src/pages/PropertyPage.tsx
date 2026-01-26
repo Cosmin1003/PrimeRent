@@ -184,9 +184,9 @@ export default function PropertyPage() {
             <div className="flex items-center gap-4 text-sm font-semibold">
               <div
                 onClick={scrollToReviews}
-                className="flex items-center gap-1 cursor-pointer"
+                className="flex items-center gap-1 cursor-pointer text-emerald-600"
               >
-                <Star className="size-4 fill-black" />
+                <Star className="size-4 fill-emerald-600" />
                 <span>
                   {property.avg_rating > 0
                     ? `${property.avg_rating.toFixed(2)} (${reviews.length})`
