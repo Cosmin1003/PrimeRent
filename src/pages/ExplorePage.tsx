@@ -435,6 +435,23 @@ export default function ExplorePage() {
           </Button>
         </div>
 
+        <div className="mb-6">
+          <p className="text-sm text-gray-500">
+            Showing{" "}
+            <span className="text-emerald-600 font-bold">
+              {sortedProperties.length}
+            </span>{" "}
+            properties
+            {location && (
+              <>
+                {" "}
+                in{" "}
+                <span className="text-emerald-600 font-bold">{location}</span>
+              </>
+            )}
+          </p>
+        </div>
+
         {/* --- PROPERTY GRID --- */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
           {loading ? (
@@ -508,7 +525,7 @@ function PropertyCard({ property }: { property: Property }) {
           Hosted by {property.host_full_name || "Host"}
         </p>
 
-        <p className="mt-2 text-[15px]">
+        <p className="mt-2 text-[15px] text-emerald-600">
           <span className="font-bold">${property.price_per_night}</span>
           <span className="text-gray-600 font-normal"> night</span>
         </p>
