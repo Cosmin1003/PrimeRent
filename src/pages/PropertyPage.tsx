@@ -3,15 +3,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "../supabaseClient";
-import {
-  Star,
-  MapPin,
-  Share,
-  Heart,
-  ChevronLeft,
-  Minus,
-  Plus,
-} from "lucide-react";
+import { Star, Share, Heart, ChevronLeft, Minus, Plus } from "lucide-react";
 
 import { Button as ShadButton } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -47,6 +39,9 @@ export default function PropertyPage() {
     reviewsRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+  const galleryImages = property?.property_images || [];
+
   useEffect(() => {
     async function fetchPropertyData() {
       setLoading(true);
@@ -54,7 +49,7 @@ export default function PropertyPage() {
         // 1. Fetch Property + Host Info
         const { data: propData, error: propError } = await supabase
           .from("properties")
-          .select(`*, profiles ( full_name )`)
+          .select(`*, profiles ( full_name ), property_images ( url )`)
           .eq("id", id)
           .single();
 
@@ -93,6 +88,7 @@ export default function PropertyPage() {
         setProperty({
           ...propData,
           host_full_name: propData.profiles?.full_name || "Host",
+          property_images: propData.property_images,
           avg_rating: avgRating, // Override with calculated rating
         });
 
@@ -106,6 +102,22 @@ export default function PropertyPage() {
     }
     if (id) fetchPropertyData();
   }, [id]);
+
+  useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (activeImageIndex === null) return;
+    if (e.key === "ArrowLeft") {
+      setActiveImageIndex(prev => (prev! > 0 ? prev! - 1 : galleryImages.length - 1));
+    } else if (e.key === "ArrowRight") {
+      setActiveImageIndex(prev => (prev! < galleryImages.length - 1 ? prev! + 1 : 0));
+    } else if (e.key === "Escape") {
+      setActiveImageIndex(null);
+    }
+  };
+
+  window.addEventListener("keydown", handleKeyDown);
+  return () => window.removeEventListener("keydown", handleKeyDown);
+}, [activeImageIndex, galleryImages.length]);
 
   if (loading) {
     return (
@@ -147,9 +159,6 @@ export default function PropertyPage() {
     }
   };
 
-  
-
-
   return (
     <div className="min-h-screen bg-gray-50 pb-00">
       {/* Mobile Top Bar */}
@@ -173,7 +182,10 @@ export default function PropertyPage() {
           <h1 className="text-2xl font-bold text-gray-900">{property.title}</h1>
           <div className="flex justify-between items-center mt-2">
             <div className="flex items-center gap-4 text-sm font-semibold">
-              <div onClick={scrollToReviews} className="flex items-center gap-1 cursor-pointer" >
+              <div
+                onClick={scrollToReviews}
+                className="flex items-center gap-1 cursor-pointer"
+              >
                 <Star className="size-4 fill-black" />
                 <span>
                   {property.avg_rating > 0
@@ -193,10 +205,7 @@ export default function PropertyPage() {
               >
                 <Share className="size-4 mr-1" /> Share
               </ShadButton>
-              <ShadButton
-                variant="ghost"
-                className="font-bold text-sm"
-              >
+              <ShadButton variant="ghost" className="font-bold text-sm">
                 <Heart className="size-4 mr-1" /> Save
               </ShadButton>
             </div>
@@ -208,45 +217,60 @@ export default function PropertyPage() {
           <div className="md:col-span-2 relative">
             <img
               src={property.main_image}
+              onClick={() => setActiveImageIndex(0)}
               className="w-full h-full object-cover hover:brightness-90 transition cursor-pointer"
               alt="Main"
             />
           </div>
           {/* Grid Placeholders for Airbnb aesthetic */}
           <div className="hidden md:block relative space-y-2">
-            <div className="h-1/2 overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800"
-                className="w-full h-full object-cover hover:brightness-90 transition"
-              />
+            <div className="h-1/2 overflow-hidden bg-gray-200">
+              {property.property_images?.[1] && (
+                <img
+                  src={property.property_images[1].url}
+                  onClick={() => setActiveImageIndex(1)}
+                  className="w-full h-full object-cover hover:brightness-90 transition cursor-pointer"
+                />
+              )}
             </div>
-            <div className="h-1/2 overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?auto=format&fit=crop&w=800"
-                className="w-full h-full object-cover hover:brightness-90 transition"
-              />
+            <div className="h-1/2 overflow-hidden bg-gray-200">
+              {property.property_images?.[2] && (
+                <img
+                  src={property.property_images[2].url}
+                  onClick={() => setActiveImageIndex(2)}
+                  className="w-full h-full object-cover hover:brightness-90 transition cursor-pointer"
+                />
+              )}
             </div>
           </div>
           <div className="hidden md:block relative space-y-2">
-            <div className="h-1/2 overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800"
-                className="w-full h-full object-cover hover:brightness-90 transition"
-              />
+            <div className="h-1/2 overflow-hidden bg-gray-200">
+              {property.property_images?.[3] && (
+                <img
+                  src={property.property_images[3].url}
+                  onClick={() => setActiveImageIndex(3)}
+                  className="w-full h-full object-cover hover:brightness-90 transition cursor-pointer"
+                />
+              )}
             </div>
-            <div className="h-1/2 overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800"
-                className="w-full h-full object-cover hover:brightness-90 transition"
-              />
+            <div className="h-1/2 overflow-hidden bg-gray-200">
+              {property.property_images?.[4] && (
+                <img
+                  src={property.property_images[4].url}
+                  onClick={() => setActiveImageIndex(4)}
+                  className="w-full h-full object-cover hover:brightness-90 transition cursor-pointer"
+                />
+              )}
             </div>
           </div>
-          <ShadButton
-            variant="outline"
-            className="absolute bottom-6 right-6 bg-white border-black text-xs font-bold shadow-md"
-          >
-            Show all photos
-          </ShadButton>
+          {(property.property_images?.length ?? 0) > 5 && (
+            <ShadButton
+              variant="outline"
+              className="absolute bottom-6 right-6 bg-white border-black text-xs font-bold shadow-md hover:bg-gray-200"
+            >
+              Show all photos
+            </ShadButton>
+          )}
         </div>
 
         {/* Layout: Info + Booking Card */}
@@ -449,7 +473,10 @@ export default function PropertyPage() {
       </div>
 
       {/* Reviews Section */}
-      <div className="container max-w-6xl mx-auto px-4 md:px-6 scroll-mt-20" ref={reviewsRef}>
+      <div
+        className="container max-w-6xl mx-auto px-4 md:px-6 scroll-mt-20"
+        ref={reviewsRef}
+      >
         <Separator className="my-12" />
 
         <section className="pb-12">
@@ -588,6 +615,53 @@ export default function PropertyPage() {
           )}
         </section>
       </div>
+
+      <Dialog
+        open={activeImageIndex !== null}
+        onOpenChange={(open) => !open && setActiveImageIndex(null)}
+      >
+        <DialogContent className="h-[90vh] p-0 bg-gray-50 border-none flex items-center justify-center outline-none lg:max-w-3xl xl:max-w-5xl  2xl:max-w-7xl">
+          <DialogTitle className="sr-only">Image Gallery</DialogTitle>
+
+          {/* Navigation - Previous */}
+          <button
+            onClick={() =>
+              setActiveImageIndex((prev) =>
+                prev! > 0 ? prev! - 1 : galleryImages.length - 1,
+              )
+            }
+            className="absolute left-4 z-50 p-3 rounded-full border-gray-200 bg-white text-gray-900 shadow-md hover:bg-gray-50 transition-all active:scale-90 cursor-pointer"
+          >
+            <ChevronLeft className="size-8" />
+          </button>
+
+          {/* The Image Container */}
+          <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12">
+            <img
+              src={galleryImages[activeImageIndex ?? 0]?.url}
+              className="max-w-full max-h-full object-contain animate-in fade-in zoom-in duration-300"
+              alt="Property"
+            />
+
+            {/* Counter Label */}
+            <div className="absolute bottom-6 px-4 py-1.5 rounded-full bg-black/80 text-white text-sm font-boldfont-medium">
+              {activeImageIndex! + 1} / {galleryImages.length}
+            </div>
+          </div>
+
+          {/* Navigation - Next */}
+          <button
+            onClick={() =>
+              setActiveImageIndex((prev) =>
+                prev! < galleryImages.length - 1 ? prev! + 1 : 0,
+              )
+            }
+            className="absolute right-4 z-50 p-3 rounded-full border-gray-200 bg-white text-gray-900 shadow-md hover:bg-gray-50 transition-all active:scale-90 cursor-pointer"
+          >
+            <ChevronLeft className="size-8 rotate-180" />
+          </button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

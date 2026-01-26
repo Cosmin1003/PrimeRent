@@ -12,4 +12,8 @@ export interface Property {
   bedrooms: number;
   beds: number;
   bathrooms: number;
+
+  property_images?: {
+    url: string;
+  }[];
 }
