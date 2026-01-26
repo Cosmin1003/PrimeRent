@@ -21,10 +21,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { Review } from "@/types/review";
+import { cn } from "@/lib/utils";
+import { useFavorite } from "@/hooks/useFavorite";
 
 export default function PropertyPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const [userId, setUserId] = useState<string | undefined>();
+  const { isFavorited, toggleFavorite } = useFavorite(id!, userId);
+
   const [property, setProperty] = useState<Property | null>(null);
   const [amenities, setAmenities] = useState<Amenity[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -104,20 +110,34 @@ export default function PropertyPage() {
   }, [id]);
 
   useEffect(() => {
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (activeImageIndex === null) return;
-    if (e.key === "ArrowLeft") {
-      setActiveImageIndex(prev => (prev! > 0 ? prev! - 1 : galleryImages.length - 1));
-    } else if (e.key === "ArrowRight") {
-      setActiveImageIndex(prev => (prev! < galleryImages.length - 1 ? prev! + 1 : 0));
-    } else if (e.key === "Escape") {
-      setActiveImageIndex(null);
-    }
-  };
+    const fetchUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUserId(user?.id);
+    };
+    fetchUser();
+  }, []);
 
-  window.addEventListener("keydown", handleKeyDown);
-  return () => window.removeEventListener("keydown", handleKeyDown);
-}, [activeImageIndex, galleryImages.length]);
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (activeImageIndex === null) return;
+      if (e.key === "ArrowLeft") {
+        setActiveImageIndex((prev) =>
+          prev! > 0 ? prev! - 1 : galleryImages.length - 1,
+        );
+      } else if (e.key === "ArrowRight") {
+        setActiveImageIndex((prev) =>
+          prev! < galleryImages.length - 1 ? prev! + 1 : 0,
+        );
+      } else if (e.key === "Escape") {
+        setActiveImageIndex(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeImageIndex, galleryImages.length]);
 
   if (loading) {
     return (
@@ -205,8 +225,18 @@ export default function PropertyPage() {
               >
                 <Share className="size-4 mr-1" /> Share
               </ShadButton>
-              <ShadButton variant="ghost" className="font-bold text-sm">
-                <Heart className="size-4 mr-1" /> Save
+              <ShadButton
+                variant="ghost"
+                className="font-bold text-sm transition-all"
+                onClick={toggleFavorite}
+              >
+                <Heart
+                  className={cn(
+                    "size-4 mr-1 transition-colors",
+                    isFavorited ? "fill-red-500 text-red-500" : "text-gray-600",
+                  )}
+                />
+                {isFavorited ? "Saved" : "Save"}
               </ShadButton>
             </div>
           </div>
@@ -483,7 +513,7 @@ export default function PropertyPage() {
           {/* Header with Star and Total Count */}
           <div className="flex items-center gap-2 text-2xl font-bold mb-8 text-emerald-700">
             <Star className="size-6 fill-emerald-600 text-emerald-600" />
-            <span >
+            <span>
               {property.avg_rating > 0 ? property.avg_rating.toFixed(2) : "New"}
             </span>
             <span className="text-emerald-600">•</span>
@@ -560,7 +590,8 @@ export default function PropertyPage() {
                     {property.avg_rating > 0
                       ? property.avg_rating.toFixed(2)
                       : "New"}{" "}
-                    <span className="text-emerald-600">·</span> {reviews.length} reviews
+                    <span className="text-emerald-600">·</span> {reviews.length}{" "}
+                    reviews
                   </DialogTitle>
                 </DialogHeader>
 

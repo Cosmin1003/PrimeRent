@@ -11,6 +11,7 @@ import {
   Check,
   SlidersHorizontal,
   ArrowUpDown,
+  Heart,
 } from "lucide-react";
 import { format } from "date-fns";
 import { type DateRange } from "react-day-picker";
@@ -42,6 +43,7 @@ import {
 import type { Property } from "../types/property";
 import type { Amenity } from "@/types/amenity";
 import { Link } from "react-router-dom";
+import { useFavorite } from "@/hooks/useFavorite";
 
 export default function ExplorePage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -64,6 +66,8 @@ export default function ExplorePage() {
     to: undefined,
   });
 
+  const [userId, setUserId] = useState<string | undefined>();
+
   useEffect(() => {
     const fetchInitialData = async () => {
       const { data } = await supabase
@@ -73,6 +77,13 @@ export default function ExplorePage() {
 
       if (data) setAllAmenities(data as Amenity[]);
     };
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUserId(user?.id);
+    };
+    getUser();
     fetchInitialData();
     fetchProperties();
   }, []);
@@ -464,7 +475,7 @@ export default function ExplorePage() {
             ))
           ) : sortedProperties.length > 0 ? (
             sortedProperties.map((prop) => (
-              <PropertyCard key={prop.id} property={prop} />
+              <PropertyCard key={prop.id} property={prop} userId={userId} />
             ))
           ) : (
             <div className="col-span-full py-20 text-center">
@@ -483,7 +494,14 @@ export default function ExplorePage() {
 }
 
 // --- Sub-component: PropertyCard ---
-function PropertyCard({ property }: { property: Property }) {
+function PropertyCard({
+  property,
+  userId,
+}: {
+  property: Property;
+  userId?: string;
+}) {
+  const { isFavorited, toggleFavorite } = useFavorite(property.id, userId);
   return (
     <Link
       to={`/explore/${property.id}`}
@@ -493,15 +511,20 @@ function PropertyCard({ property }: { property: Property }) {
         {/* Image Container */}
         <div className="relative aspect-square overflow-hidden rounded-xl mb-3 shadow-sm">
           <img
-            src={
-              property.main_image ||
-              "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=2070&auto=format&fit=crop"
-            }
+            src={property.main_image}
             alt={property.title}
             className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
           />
-          <button className="absolute top-3 right-3 p-2 rounded-full bg-black/10 backdrop-blur-md hover:bg-black/20 transition">
-            <Star className="size-4 text-white fill-white/20" />
+          <button
+            onClick={toggleFavorite}
+            className="absolute top-3 right-3 p-2 rounded-full bg-white/70 backdrop-blur-md hover:bg-white transition shadow-sm z-10 cursor-pointer"
+          >
+            <Heart
+              className={cn(
+                "size-5 transition-colors",
+                isFavorited ? "fill-red-500 text-red-500" : "text-gray-600",
+              )}
+            />
           </button>
         </div>
 
