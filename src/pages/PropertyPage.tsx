@@ -61,6 +61,8 @@ export default function PropertyPage() {
     to: undefined,
   });
 
+  const [bookedDates, setBookedDates] = useState<DateRange[]>([]);
+
   useEffect(() => {
     async function fetchPropertyData() {
       setLoading(true);
@@ -94,6 +96,20 @@ export default function PropertyPage() {
           )
           .eq("property_id", id)
           .order("created_at", { ascending: false });
+
+        const { data: bookingsData } = await supabase
+          .from("bookings")
+          .select("check_in, check_out")
+          .eq("property_id", id)
+          .neq("status", "cancelled");
+
+        if (bookingsData) {
+          const ranges = bookingsData.map((b) => ({
+            from: new Date(b.check_in),
+            to: new Date(b.check_out),
+          }));
+          setBookedDates(ranges);
+        }
 
         if (revError) throw revError;
 
@@ -203,6 +219,18 @@ export default function PropertyPage() {
     } catch (err) {
       console.error("Error sharing:", err);
     }
+  };
+
+  const isRangeAvailable = (range: DateRange | undefined) => {
+    if (!range?.from || !range?.to) return true;
+
+    return !bookedDates.some((booked) => {
+      // Check if any booked date falls between the user's selected from/to
+      return (
+        (booked.from! >= range.from! && booked.from! <= range.to!) ||
+        (booked.to! >= range.from! && booked.to! <= range.to!)
+      );
+    });
   };
 
   return (
@@ -525,9 +553,15 @@ export default function PropertyPage() {
                       selected={date}
                       onSelect={setDate}
                       numberOfMonths={2}
-                      disabled={(date) =>
-                        date < new Date(new Date().setHours(0, 0, 0, 0))
-                      }
+                      disabled={[
+                        // 1. Disable past dates
+                        { before: new Date(new Date().setHours(0, 0, 0, 0)) },
+                        // 2. Disable existing booking ranges
+                        ...bookedDates.map((range) => ({
+                          from: range.from!,
+                          to: range.to!,
+                        })),
+                      ]}
                       classNames={{
                         day: cn(
                           "[&_[data-range-start=true]]:!bg-emerald-600 [&_[data-range-start=true]]:!text-white",
@@ -567,12 +601,20 @@ export default function PropertyPage() {
                 </div>
               </div>
 
-              <ShadButton
-                disabled={nights === 0}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 text-lg rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Reserve
-              </ShadButton>
+              <div className="space-y-2">
+                <ShadButton
+                  disabled={nights === 0 || !isRangeAvailable(date)}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 text-lg rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Reserve
+                </ShadButton>
+
+                {nights > 0 && !isRangeAvailable(date) && (
+                  <p className="text-destructive text-xs text-center font-medium animate-in fade-in slide-in-from-top-1">
+                    Some dates in this range are already booked.
+                  </p>
+                )}
+              </div>
 
               <div className="mt-6 space-y-4">
                 {nights > 0 ? (
