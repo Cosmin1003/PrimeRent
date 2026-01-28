@@ -181,31 +181,29 @@ export default function ExplorePage() {
                 <span className="font-bold">Sort</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="rounded-2xl w-48 p-2">
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => setSortBy("default")}
-              >
-                Default
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => setSortBy("rating-desc")}
-              >
-                Top Rated
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => setSortBy("price-asc")}
-              >
-                Price: Low to High
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => setSortBy("price-desc")}
-              >
-                Price: High to Low
-              </DropdownMenuItem>
+            <DropdownMenuContent align="start" className="rounded-2xl w-56 p-2">
+              {[
+                { id: "default", label: "Default" },
+                { id: "rating-desc", label: "Top Rated" },
+                { id: "price-asc", label: "Price: Low to High" },
+                { id: "price-desc", label: "Price: High to Low" },
+              ].map((item) => (
+                <DropdownMenuItem
+                  key={item.id}
+                  className={cn(
+                    "cursor-pointer flex items-center justify-between rounded-xl px-3 py-2",
+                    sortBy === item.id
+                      ? "bg-emerald-50 text-emerald-900 font-semibold"
+                      : "",
+                  )}
+                  onClick={() => setSortBy(item.id)}
+                >
+                  {item.label}
+                  {sortBy === item.id && (
+                    <Check className="size-4 text-emerald-600" />
+                  )}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
 
