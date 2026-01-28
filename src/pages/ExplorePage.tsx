@@ -155,8 +155,13 @@ export default function ExplorePage() {
   const sortedProperties = [...properties].sort((a, b) => {
     if (sortBy === "price-asc") return a.price_per_night - b.price_per_night;
     if (sortBy === "price-desc") return b.price_per_night - a.price_per_night;
-    // If you add a rating column to your Property type later:
-    // if (sortBy === "rating") return b.rating - a.rating;
+    if (sortBy === "rating-desc") {
+      // Handle cases where avg_rating might be null or 0 (New properties)
+      const ratingA = a.avg_rating || 0;
+      const ratingB = b.avg_rating || 0;
+      return ratingB - ratingA;
+    }
+
     return 0; // default
   });
 
@@ -182,6 +187,12 @@ export default function ExplorePage() {
                 onClick={() => setSortBy("default")}
               >
                 Default
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setSortBy("rating-desc")}
+              >
+                Top Rated
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer"
