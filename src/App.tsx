@@ -6,6 +6,7 @@ import HomePage from "./pages/HomePage";
 import { Navbar1 } from "./components/navbar1";
 import ExplorePage from "./pages/ExplorePage";
 import PropertyPage from "./pages/PropertyPage";
+import BookingsPage from "./pages/BookingsPage";
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -38,6 +39,7 @@ function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/explore/:id" element={<PropertyPage />} />
+          <Route path="/bookings" element={<BookingsPage />} />
         </Routes>
       </main>
     </Router>

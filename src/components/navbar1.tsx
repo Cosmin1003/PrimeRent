@@ -72,7 +72,7 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <Link
-                    to="/"
+                    to="/bookings"
                     className="text-[18px] font-bold text-black hover:text-emerald-600 transition-colors"
                   >
                     My Bookings
@@ -138,7 +138,7 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                     <Link to="/explore" className="text-md font-semibold">
                       Explore
                     </Link>
-                    <Link to="/" className="text-md font-semibold">
+                    <Link to="/bookings" className="text-md font-semibold">
                       My Bookings
                     </Link>
                   </div>
