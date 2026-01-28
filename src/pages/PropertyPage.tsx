@@ -233,6 +233,40 @@ export default function PropertyPage() {
     });
   };
 
+  const handleReserve = async () => {
+    if (!date?.from || !date?.to || !userId) {
+      alert("Please log in and select dates");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.rpc("create_booking", {
+        p_property_id: id,
+        p_guest_id: userId,
+        p_check_in: format(date.from, "yyyy-MM-dd"),
+        p_check_out: format(date.to, "yyyy-MM-dd"),
+        p_total_price: totalPrice,
+        p_guest_count: guestCount,
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        alert("Success! Your stay is booked.");
+        navigate("/bookings");
+      } else {
+        alert(`Booking failed: ${data.message}`);
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-00">
       {/* Mobile Top Bar */}
@@ -603,6 +637,7 @@ export default function PropertyPage() {
 
               <div className="space-y-2">
                 <ShadButton
+                  onClick={handleReserve}
                   disabled={nights === 0 || !isRangeAvailable(date)}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 text-lg rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
