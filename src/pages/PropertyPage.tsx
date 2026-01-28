@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { Star, Share, Heart, ChevronLeft, Minus, Plus } from "lucide-react";
 
-import { Button as ShadButton } from "@/components/ui/button";
+import { Button, Button as ShadButton } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 // Types
@@ -23,6 +23,14 @@ import {
 import type { Review } from "@/types/review";
 import { cn } from "@/lib/utils";
 import { useFavorite } from "@/hooks/useFavorite";
+import type { DateRange } from "react-day-picker";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { differenceInDays, format } from "date-fns";
 
 export default function PropertyPage() {
   const { id } = useParams();
@@ -47,6 +55,11 @@ export default function PropertyPage() {
 
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const galleryImages = property?.property_images || [];
+
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: undefined,
+    to: undefined,
+  });
 
   useEffect(() => {
     async function fetchPropertyData() {
@@ -159,6 +172,19 @@ export default function PropertyPage() {
       </div>
     );
   }
+
+  const calculateNights = () => {
+    if (date?.from && date?.to) {
+      const nights = differenceInDays(date.to, date.from);
+      return nights > 0 ? nights : 0;
+    }
+    return 0;
+  };
+
+  const nights = calculateNights();
+  const cleaningFee = 85;
+  const basePrice = Math.round(property.price_per_night * nights);
+  const totalPrice = basePrice + cleaningFee;
 
   const handleShare = async () => {
     const shareData = {
@@ -440,20 +466,81 @@ export default function PropertyPage() {
 
               {/* Selector Logic */}
               <div className="border border-gray-400 rounded-xl overflow-hidden mb-4">
-                <div className="grid grid-cols-2 border-b border-gray-400">
-                  <div className="p-3 border-r border-gray-400 cursor-pointer hover:bg-gray-50">
-                    <label className="block text-[10px] font-extrabold uppercase">
-                      Check-in
-                    </label>
-                    <span className="text-sm">Add date</span>
-                  </div>
-                  <div className="p-3 cursor-pointer hover:bg-gray-50">
-                    <label className="block text-[10px] font-extrabold uppercase">
-                      Checkout
-                    </label>
-                    <span className="text-sm">Add date</span>
-                  </div>
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="grid grid-cols-2 border-b border-gray-400 divide-x divide-gray-400 cursor-pointer hover:bg-gray-50 transition-colors">
+                      <div className="p-3">
+                        <label className="block text-[10px] font-extrabold uppercase text-gray-500">
+                          Check-in
+                        </label>
+                        <span
+                          className={cn(
+                            "text-sm font-medium",
+                            !date?.from && "text-gray-400 font-normal",
+                          )}
+                        >
+                          {date?.from
+                            ? format(date.from, "MM/dd/yyyy")
+                            : "Add date"}
+                        </span>
+                      </div>
+                      <div className="p-3">
+                        <label className="block text-[10px] font-extrabold uppercase text-gray-500">
+                          Checkout
+                        </label>
+                        <span
+                          className={cn(
+                            "text-sm font-medium",
+                            !date?.to && "text-gray-400 font-normal",
+                          )}
+                        >
+                          {date?.to
+                            ? format(date.to, "MM/dd/yyyy")
+                            : "Add date"}
+                        </span>
+                      </div>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-auto p-0 rounded-3xl"
+                    align="end"
+                  >
+                    <div className="p-4 border-b flex justify-between items-center">
+                      <span className="text-sm font-bold">Select Dates</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          setDate({ from: undefined, to: undefined })
+                        }
+                        className="text-xs underline"
+                      >
+                        Clear dates
+                      </Button>
+                    </div>
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={date?.from}
+                      selected={date}
+                      onSelect={setDate}
+                      numberOfMonths={2}
+                      disabled={(date) =>
+                        date < new Date(new Date().setHours(0, 0, 0, 0))
+                      }
+                      classNames={{
+                        day: cn(
+                          "[&_[data-range-start=true]]:!bg-emerald-600 [&_[data-range-start=true]]:!text-white",
+                          "[&_[data-range-end=true]]:!bg-emerald-600 [&_[data-range-end=true]]:!text-white",
+                          "[&_[data-range-middle=true]]:!bg-emerald-100 [&_[data-range-middle=true]]:!text-emerald-900",
+                        ),
+                        range_start: "!bg-emerald-600 !rounded-l-md",
+                        range_end: "!bg-emerald-600 !rounded-r-md",
+                        range_middle: "!bg-emerald-100",
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
                 <div className="p-3 flex justify-between items-center">
                   <div>
                     <label className="block text-[10px] font-extrabold uppercase">
@@ -464,13 +551,15 @@ export default function PropertyPage() {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setGuestCount(Math.max(1, guestCount - 1))}
-                      className="size-7 rounded-full border border-gray-300 flex items-center justify-center"
+                      disabled={guestCount <= 1}
+                      className="size-7 rounded-full border border-gray-300 flex items-center justify-center enabled:hover:border-black disabled:opacity-30 transition-all enabled:cursor-pointer disabled:cursor-not-allowed"
                     >
                       <Minus className="size-3" />
                     </button>
                     <button
                       onClick={() => setGuestCount(guestCount + 1)}
-                      className="size-7 rounded-full border border-gray-300 flex items-center justify-center"
+                      disabled={guestCount >= property.max_guests}
+                      className="size-7 rounded-full border border-gray-300 flex items-center justify-center enabled:hover:border-black disabled:opacity-30 transition-all enabled:cursor-pointer disabled:cursor-not-allowed"
                     >
                       <Plus className="size-3" />
                     </button>
@@ -478,24 +567,40 @@ export default function PropertyPage() {
                 </div>
               </div>
 
-              <ShadButton className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 text-lg rounded-xl transition-all active:scale-[0.98]">
+              <ShadButton
+                disabled={nights === 0}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 text-lg rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Reserve
               </ShadButton>
 
               <div className="mt-6 space-y-4">
-                <div className="flex justify-between text-gray-600 underline">
-                  <span>${property.price_per_night} x 5 nights</span>
-                  <span>${property.price_per_night * 5}</span>
-                </div>
-                <div className="flex justify-between text-gray-600 underline">
-                  <span>Cleaning fee</span>
-                  <span>$85</span>
-                </div>
-                <Separator />
-                <div className="flex justify-between font-bold text-lg pt-2">
-                  <span>Total before taxes</span>
-                  <span>${property.price_per_night * 5 + 85}</span>
-                </div>
+                {nights > 0 ? (
+                  <>
+                    <div className="flex justify-between text-gray-600">
+                      <span>
+                        ${property.price_per_night} x {nights}{" "}
+                        {nights === 1 ? "night" : "nights"}
+                      </span>
+                      <span>${basePrice}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600">
+                      <span>Cleaning fee</span>
+                      <span>${cleaningFee}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between font-bold text-lg pt-2">
+                      <span>Total before taxes</span>
+                      <span>${totalPrice}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="mt-6 text-center">
+                    <p className="text-sm text-gray-500">
+                      Select dates to see total price
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
