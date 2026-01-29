@@ -7,6 +7,7 @@ import { Navbar1 } from "./components/navbar1";
 import ExplorePage from "./pages/ExplorePage";
 import PropertyPage from "./pages/PropertyPage";
 import BookingsPage from "./pages/BookingsPage";
+import FavoritesPage from "./pages/FavoritesPage";
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -40,6 +41,7 @@ function App() {
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/explore/:id" element={<PropertyPage />} />
           <Route path="/bookings" element={<BookingsPage />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
         </Routes>
       </main>
     </Router>

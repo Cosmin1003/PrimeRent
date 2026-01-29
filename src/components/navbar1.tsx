@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, LogOut, Search } from "lucide-react";
+import { Menu, LogOut, Search, Heart } from "lucide-react";
 import { Link } from "react-router-dom"; // Added for routing
 import { supabase } from "../supabaseClient"; // Import your client
 import { cn } from "@/lib/utils";
@@ -68,6 +68,15 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                   >
                     <Search className="size-4 text-emerald-600 group-hover:scale-110 transition-transform" />
                     <span>Explore Destinations</span>
+                  </Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link
+                    to="/favorites"
+                    className="group/favorites flex items-center gap-2 text-[18px] font-bold text-black hover:text-emerald-600 transition-colors"
+                  >
+                    <Heart className="size-5 fill-black group-hover/favorites:fill-emerald-600 transition-colors" />
+                    <span>Favorites</span>
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>

@@ -503,7 +503,7 @@ export default function ExplorePage() {
 }
 
 // --- Sub-component: PropertyCard ---
-function PropertyCard({
+export function PropertyCard({
   property,
   userId,
 }: {
