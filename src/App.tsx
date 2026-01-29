@@ -8,6 +8,7 @@ import ExplorePage from "./pages/ExplorePage";
 import PropertyPage from "./pages/PropertyPage";
 import BookingsPage from "./pages/BookingsPage";
 import FavoritesPage from "./pages/FavoritesPage";
+import Footer from "./components/Footer";
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -44,6 +45,7 @@ function App() {
           <Route path="/favorites" element={<FavoritesPage />} />
         </Routes>
       </main>
+      <Footer />
     </Router>
   );
 }
