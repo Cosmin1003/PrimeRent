@@ -4,11 +4,20 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
-import { Calendar, MapPin, CreditCard, ChevronRight } from "lucide-react";
+import { Calendar, MapPin, CreditCard, ChevronRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Booking } from "../types/booking";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -141,7 +150,40 @@ function BookingCard({
     completed: "bg-gray-100 text-gray-700",
   };
 
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
   const isCancellable = !["cancelled", "completed"].includes(booking.status);
+  const isCompletable = booking.status === "completed";
+
+  const handleSubmitReview = async () => {
+    setSubmitting(true);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase.from("reviews").insert({
+        property_id: booking.property_id,
+        guest_id: user.id,
+        rating: rating,
+        comment: comment,
+      });
+
+      if (error) throw error;
+
+      setIsReviewOpen(false);
+      alert("Review submitted successfully!");
+    } catch (error) {
+      console.error(error);
+      alert("Error submitting review.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex flex-col md:flex-row border border-gray-200 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300 group">
@@ -229,6 +271,77 @@ function BookingCard({
             >
               Cancel Trip
             </Button>
+          )}
+
+          {isCompletable && (
+            <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  size="sm"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs"
+                >
+                  Add Review
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px] rounded-3xl">
+                <DialogHeader>
+                  <DialogTitle className="text-xl font-bold">
+                    Review your stay at {booking.properties.title}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-sm font-medium text-gray-500">
+                      How was your experience?
+                    </span>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={cn(
+                            "size-8 cursor-pointer transition-colors",
+                            star <= rating
+                              ? "fill-emerald-600 text-emerald-600"
+                              : "text-gray-300",
+                          )}
+                          onClick={() => setRating(star)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-500">
+                        Your comments
+                      </span>
+                      {/* Character Counter */}
+                      <span
+                        className={`text-xs ${comment.length >= 500 ? "text-red-500" : "text-gray-400"}`}
+                      >
+                        {comment.length}/500
+                      </span>
+                    </div>
+                    <Textarea
+                      placeholder="Share details of your stay..."
+                      className="rounded-xl resize-none max-h-[150px] overflow-y-auto break-all whitespace-pre-wrap"
+                      rows={4}
+                      value={comment}
+                      maxLength={500}
+                      onChange={(e) => setComment(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    onClick={handleSubmitReview}
+                    disabled={submitting}
+                    className="w-full bg-black hover:bg-emerald-600 rounded-full"
+                  >
+                    {submitting ? "Submitting..." : "Post Review"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           )}
         </div>
       </div>
