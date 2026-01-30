@@ -19,7 +19,7 @@ interface PropertyMapProps {
 
 export default function PropertyMap({ lat, lng, address }: PropertyMapProps) {
   return (
-    <div className="h-[600px] w-full z-0">
+    <div className="h-[600px] w-full relative z-10">
       <MapContainer
         center={[lat, lng]}
         zoom={15}
