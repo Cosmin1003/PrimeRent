@@ -4,6 +4,8 @@ export interface Property {
   description: string;
   city: string;
   address: string;
+  lat: number;
+  lng: number;
   price_per_night: number;
   max_guests: number;
   main_image: string;

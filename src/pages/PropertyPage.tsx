@@ -32,6 +32,10 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { differenceInDays, format } from "date-fns";
 
+import { lazy, Suspense } from "react";
+
+const PropertyMap = lazy(() => import("@/components/PropertyMap"));
+
 export default function PropertyPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -875,6 +879,33 @@ export default function PropertyPage() {
           </button>
         </DialogContent>
       </Dialog>
+
+      {/* Property Map Section */}
+      <div className="container max-w-6xl mx-auto px-4 md:px-6">
+        {" "}
+        {/* Ensure this wrapper exists */}
+        <Separator className="my-12" />
+        <section className="mb-12">
+          <h3 className="text-xl font-bold mb-6">Where you'll be</h3>
+          <p className="text-gray-600 mb-6">
+            {property.city}, {property.address}
+          </p>
+
+          <div className="w-full rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+            <Suspense
+              fallback={
+                <div className="h-[400px] w-full bg-gray-100 animate-pulse" />
+              }
+            >
+              <PropertyMap
+                lat={property.lat}
+                lng={property.lng}
+                address={property.address}
+              />
+            </Suspense>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
