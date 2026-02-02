@@ -43,7 +43,7 @@ export default function HostReservationPage() {
           `
           id, check_in, check_out, total_price, status,
           properties!inner ( title, main_image, host_id ),
-          profiles:guest_id ( full_name, avatar_url )
+          profiles:guest_id ( full_name, avatar_url, email )
         `,
         )
         .eq("properties.host_id", user.id)
@@ -154,7 +154,7 @@ export default function HostReservationPage() {
                 <div>
                   <h3 className="font-bold">{req.properties.title}</h3>
                   <p className="text-sm text-gray-500 flex items-center gap-1">
-                    <User className="size-3" /> {req.profiles.full_name}
+                    <User className="size-3" /> {req.profiles.full_name || req.profiles.email.split("@")[0]}
                   </p>
                   <p className="text-xs font-medium mt-1">
                     {format(new Date(req.check_in), "MMM d")} -{" "}
