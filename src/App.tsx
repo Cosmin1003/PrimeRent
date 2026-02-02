@@ -10,6 +10,7 @@ import BookingsPage from "./pages/BookingsPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import Footer from "./components/Footer";
 import ProfilePage from "./pages/ProfilePage";
+import HostDashboardPage from "./pages/HostDashboardPage";
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -45,6 +46,7 @@ function App() {
           <Route path="/bookings" element={<BookingsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/dashboard" element={<HostDashboardPage />} />
         </Routes>
       </main>
       <Footer />
