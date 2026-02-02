@@ -34,18 +34,20 @@ interface NavbarProps {
 
 const Navbar1 = ({ user, className }: NavbarProps) => {
   const [profileName, setProfileName] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     const getProfile = async () => {
       if (user) {
         const { data } = await supabase
           .from("profiles")
-          .select("full_name")
+          .select("full_name, role")
           .eq("id", user.id)
           .single();
 
-        if (data?.full_name) {
+        if (data) {
           setProfileName(data.full_name);
+          setRole(data.role);
         }
       } else {
         setProfileName(null);
@@ -110,6 +112,16 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                     My Bookings
                   </Link>
                 </NavigationMenuItem>
+                {role === "host" && (
+                  <NavigationMenuItem>
+                    <Link
+                      to="/host/dashboard"
+                      className="text-[18px] font-bold text-black hover:text-emerald-600 transition-colors"
+                    >
+                      Dashboard
+                    </Link>
+                  </NavigationMenuItem>
+                )}
               </NavigationMenuList>
             </NavigationMenu>
           </div>

@@ -11,6 +11,7 @@ import FavoritesPage from "./pages/FavoritesPage";
 import Footer from "./components/Footer";
 import ProfilePage from "./pages/ProfilePage";
 import HostDashboardPage from "./pages/HostDashboardPage";
+import HostReservationPage from "./pages/HostReservationPage";
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -46,7 +47,8 @@ function App() {
           <Route path="/bookings" element={<BookingsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/dashboard" element={<HostDashboardPage />} />
+          <Route path="/host/dashboard" element={<HostDashboardPage />} />
+          <Route path="/host/reservations" element={<HostReservationPage />} />
         </Routes>
       </main>
       <Footer />
