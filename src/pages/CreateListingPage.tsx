@@ -224,7 +224,7 @@ export default function CreateListingPage() {
             </p>
           </div>
           <div className="hidden md:block">
-            <PlusCircle size={48} className="text-emerald-100" />
+            <PlusCircle size={48} className="text-emerald-600" />
           </div>
         </div>
 
