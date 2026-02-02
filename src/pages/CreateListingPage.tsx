@@ -205,7 +205,7 @@ export default function CreateListingPage() {
         {/* Navigation */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors mb-6 group"
+          className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors mb-6 group cursor-pointer"
         >
           <ChevronLeft
             size={20}
