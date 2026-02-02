@@ -25,6 +25,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useEffect, useState } from "react";
 
 interface NavbarProps {
   user: any;
@@ -32,6 +33,28 @@ interface NavbarProps {
 }
 
 const Navbar1 = ({ user, className }: NavbarProps) => {
+  const [profileName, setProfileName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getProfile = async () => {
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .single();
+
+        if (data?.full_name) {
+          setProfileName(data.full_name);
+        }
+      } else {
+        setProfileName(null);
+      }
+    };
+
+    getProfile();
+  }, [user]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
@@ -94,9 +117,12 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
           <div className="flex gap-2">
             {user ? (
               <div className="flex items-center gap-4">
-                <span className="text-xs font-bold text-black uppercase tracking-wider">
-                  {user.email.split("@")[0]}
-                </span>
+                <Link
+                  to="/profile"
+                  className="text-xs font-bold text-black uppercase tracking-wider hover:text-emerald-600 transition-colors"
+                >
+                  {profileName || user.email.split("@")[0]}
+                </Link>
                 <Button
                   variant="ghost"
                   size="sm"

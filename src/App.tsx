@@ -9,6 +9,7 @@ import PropertyPage from "./pages/PropertyPage";
 import BookingsPage from "./pages/BookingsPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import Footer from "./components/Footer";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -43,6 +44,7 @@ function App() {
           <Route path="/explore/:id" element={<PropertyPage />} />
           <Route path="/bookings" element={<BookingsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </main>
       <Footer />
