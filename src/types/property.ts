@@ -14,6 +14,7 @@ export interface Property {
   bedrooms: number;
   beds: number;
   bathrooms: number;
+  is_active: boolean;
 
   property_images?: {
     url: string;

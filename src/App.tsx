@@ -13,6 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 import HostDashboardPage from "./pages/HostDashboardPage";
 import HostReservationsPage from "./pages/HostReservationsPage";
 import CreateListingPage from "./pages/CreateListingPage";
+import ManageListingsPage from "./pages/ManageListingsPage";
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -51,6 +52,7 @@ function App() {
           <Route path="/host/dashboard" element={<HostDashboardPage />} />
           <Route path="/host/reservations" element={<HostReservationsPage />} />
           <Route path="/host/create-listing" element={<CreateListingPage />} />
+          <Route path="/host/manage-listings" element={<ManageListingsPage />} />
         </Routes>
       </main>
       <Footer />
