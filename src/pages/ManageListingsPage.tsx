@@ -165,7 +165,7 @@ export default function ManageListingsPage() {
                       {property.is_active ? "Active" : "Hidden"}
                     </Badge>
                   </div>
-                  <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-sm font-bold">
+                  <div className="absolute bottom-4 right-4 bg-emerald-600/85 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-sm font-bold">
                     ${property.price_per_night}/night
                   </div>
                 </div>
