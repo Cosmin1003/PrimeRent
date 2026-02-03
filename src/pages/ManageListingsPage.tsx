@@ -209,7 +209,7 @@ export default function ManageListingsPage() {
                       variant="ghost" 
                       size="sm"
                       className="flex flex-col h-auto py-2 hover:bg-blue-50 hover:text-blue-600 gap-1"
-                      onClick={() => alert("Edit functionality coming soon!")}
+                      onClick={() => navigate(`/host/edit-listing/${property.id}`)}
                     >
                       <Pencil className="size-4" />
                       <span className="text-[10px] font-bold uppercase">Edit</span>

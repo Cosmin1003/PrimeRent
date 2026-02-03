@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import {
   Building2,
@@ -69,6 +69,9 @@ function LocationPicker({
 }
 
 export default function CreateListingPage() {
+  const { id } = useParams();
+  const isEditMode = !!id;
+
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [isHost, setIsHost] = useState(false);
@@ -110,13 +113,99 @@ export default function CreateListingPage() {
     }
   };
 
-  const removeImage = (index: number) => {
+  const removeImage = async (index: number) => {
+    const urlToRemove = previews[index];
+
+    // 1. If we are in Edit Mode and the URL is a remote Supabase URL
+    if (isEditMode && urlToRemove.includes("supabase.co")) {
+      const confirmDelete = window.confirm(
+        "Are you sure you want to permanently delete this photo?",
+      );
+      if (!confirmDelete) return;
+
+      try {
+        // A. Extract file path from URL (e.g., "propertyId/filename.jpg")
+        const filePath = urlToRemove.split("properties/").pop();
+        if (filePath) {
+          await supabase.storage.from("properties").remove([filePath]);
+        }
+
+        // B. Delete record from database
+        await supabase.from("property_images").delete().eq("url", urlToRemove);
+
+        // C. If this was the main_image, reset it in properties table
+        if (formData.main_image === urlToRemove) {
+          await supabase
+            .from("properties")
+            .update({ main_image: null })
+            .eq("id", id);
+        }
+      } catch (error) {
+        console.error("Error deleting image:", error);
+        alert("Failed to delete image from server.");
+        return;
+      }
+    }
+
+    // 2. Handle Local State Cleanup (Existing Logic)
     setImages((prev) => prev.filter((_, i) => i !== index));
 
-    // Revoke URL to prevent memory leaks
-    URL.revokeObjectURL(previews[index]);
+    // Only revoke if it's a blob URL (not a remote Supabase URL)
+    if (urlToRemove.startsWith("blob:")) {
+      URL.revokeObjectURL(urlToRemove);
+    }
+
     setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
+
+  useEffect(() => {
+    if (isEditMode) {
+      fetchPropertyDetails();
+    }
+  }, [id]);
+
+  async function fetchPropertyDetails() {
+    setLoading(true);
+    try {
+      // Fetch property, images, and amenities
+      const { data: property, error } = await supabase
+        .from("properties")
+        .select(`*, property_images(url), property_amenities(amenity_id)`)
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+
+      // Map DB data to your Form State
+      setFormData({
+        title: property.title,
+        description: property.description,
+        address: property.address,
+        city: property.city,
+        price_per_night: property.price_per_night.toString(),
+        max_guests: property.max_guests,
+        bedrooms: property.bedrooms,
+        beds: property.beds,
+        bathrooms: property.bathrooms,
+        lat: property.lat,
+        lng: property.lng,
+        main_image: property.main_image,
+      });
+
+      // Map existing amenities
+      setSelectedAmenities(
+        property.property_amenities.map((a: any) => a.amenity_id),
+      );
+
+      // Set existing image previews
+      setPreviews(property.property_images.map((img: any) => img.url));
+    } catch (error) {
+      console.error("Error loading property:", error);
+      alert("Could not load property data");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     return () => {
@@ -190,93 +279,152 @@ export default function CreateListingPage() {
         throw new Error("Please upload at least one image for your property.");
       }
 
-      // 3. Create Property Record First (to get the ID)
-      const { data: property, error: propError } = await supabase
-        .from("properties")
-        .insert([
-          {
-            ...formData,
-            host_id: user.id,
-            price_per_night: parseFloat(formData.price_per_night),
-            // We set the main_image temporarily to null or a placeholder
-            // We will update it after uploading the images
-            main_image: null,
-            is_active: true,
-          },
-        ])
-        .select()
-        .single();
+      let propertyId = id;
 
-      if (propError) throw propError;
-
-      const propertyId = property.id;
-      const uploadedImageUrls: string[] = [];
-
-      // 4. Upload Images to Supabase Storage
-      // Folder structure: properties/{propertyId}/{fileName}
-      const uploadPromises = images.map(async (image) => {
-        const fileExt = image.name.split(".").pop();
-        // Create unique filename to prevent overwrites
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${propertyId}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("properties")
-          .upload(filePath, image);
-
-        if (uploadError) throw uploadError;
-
-        // Get Public URL
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("properties").getPublicUrl(filePath);
-
-        return publicUrl;
-      });
-
-      // Wait for all uploads to finish
-      const urls = await Promise.all(uploadPromises);
-      uploadedImageUrls.push(...urls);
-
-      // 5. Insert into property_images table
-      const imageRecords = uploadedImageUrls.map((url, index) => ({
-        property_id: propertyId,
-        url: url,
-        display_order: index,
-      }));
-
-      const { error: imgTableError } = await supabase
-        .from("property_images")
-        .insert(imageRecords);
-
-      if (imgTableError) throw imgTableError;
-
-      // 6. Update the main 'properties' table with the first image as the cover
-      if (uploadedImageUrls.length > 0) {
+      if (isEditMode) {
+        // 1. Update basic property info
         const { error: updateError } = await supabase
           .from("properties")
-          .update({ main_image: uploadedImageUrls[0] })
-          .eq("id", propertyId);
+          .update({
+            ...formData,
+            price_per_night: parseFloat(formData.price_per_night),
+          })
+          .eq("id", id);
 
         if (updateError) throw updateError;
-      }
 
-      // 7. Insert Amenities (Existing Logic)
-      if (selectedAmenities.length > 0) {
-        const amenityRelations = selectedAmenities.map((amenityId) => ({
+        // 2. Upload NEW images if any were added
+        if (images.length > 0) {
+          const uploadPromises = images.map(async (image) => {
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}`;
+            const filePath = `${id}/${fileName}`;
+            await supabase.storage.from("properties").upload(filePath, image);
+            const {
+              data: { publicUrl },
+            } = supabase.storage.from("properties").getPublicUrl(filePath);
+            return publicUrl;
+          });
+
+          const newUrls = await Promise.all(uploadPromises);
+
+          // 3. Add new image records to the table
+          const imageRecords = newUrls.map((url) => ({
+            property_id: id,
+            url: url,
+          }));
+          await supabase.from("property_images").insert(imageRecords);
+
+          // 4. Update main_image if it was empty
+          if (!formData.main_image && newUrls.length > 0) {
+            await supabase
+              .from("properties")
+              .update({ main_image: newUrls[0] })
+              .eq("id", id);
+          }
+        }
+
+        // 5. Update Amenities (Sync approach: delete all and re-insert)
+        await supabase
+          .from("property_amenities")
+          .delete()
+          .eq("property_id", id);
+        if (selectedAmenities.length > 0) {
+          const amenityRelations = selectedAmenities.map((amId) => ({
+            property_id: id,
+            amenity_id: amId,
+          }));
+          await supabase.from("property_amenities").insert(amenityRelations);
+        }
+      } else {
+        const { data: property, error: propError } = await supabase
+          .from("properties")
+          .insert([
+            {
+              ...formData,
+              host_id: user.id,
+              price_per_night: parseFloat(formData.price_per_night),
+              // We set the main_image temporarily to null or a placeholder
+              // We will update it after uploading the images
+              main_image: null,
+              is_active: true,
+            },
+          ])
+          .select()
+          .single();
+
+        if (propError) throw propError;
+
+        const propertyId = property.id;
+        const uploadedImageUrls: string[] = [];
+
+        // 4. Upload Images to Supabase Storage
+        // Folder structure: properties/{propertyId}/{fileName}
+        const uploadPromises = images.map(async (image) => {
+          const fileExt = image.name.split(".").pop();
+          // Create unique filename to prevent overwrites
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+          const filePath = `${propertyId}/${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from("properties")
+            .upload(filePath, image);
+
+          if (uploadError) throw uploadError;
+
+          // Get Public URL
+          const {
+            data: { publicUrl },
+          } = supabase.storage.from("properties").getPublicUrl(filePath);
+
+          return publicUrl;
+        });
+
+        // Wait for all uploads to finish
+        const urls = await Promise.all(uploadPromises);
+        uploadedImageUrls.push(...urls);
+
+        // 5. Insert into property_images table
+        const imageRecords = uploadedImageUrls.map((url, index) => ({
           property_id: propertyId,
-          amenity_id: amenityId,
+          url: url,
+          display_order: index,
         }));
 
-        const { error: amenityError } = await supabase
-          .from("property_amenities")
-          .insert(amenityRelations);
+        const { error: imgTableError } = await supabase
+          .from("property_images")
+          .insert(imageRecords);
 
-        if (amenityError) throw amenityError;
+        if (imgTableError) throw imgTableError;
+
+        // 6. Update the main 'properties' table with the first image as the cover
+        if (uploadedImageUrls.length > 0) {
+          const { error: updateError } = await supabase
+            .from("properties")
+            .update({ main_image: uploadedImageUrls[0] })
+            .eq("id", propertyId);
+
+          if (updateError) throw updateError;
+        }
+
+        // 7. Insert Amenities (Existing Logic)
+        if (selectedAmenities.length > 0) {
+          const amenityRelations = selectedAmenities.map((amenityId) => ({
+            property_id: propertyId,
+            amenity_id: amenityId,
+          }));
+
+          const { error: amenityError } = await supabase
+            .from("property_amenities")
+            .insert(amenityRelations);
+
+          if (amenityError) throw amenityError;
+        }
       }
 
+      // 3. Create Property Record First (to get the ID)
+
       alert("Property listed successfully!");
-      navigate("/explore"); // or wherever you want to go
+      navigate("/host/manage-listings"); // or wherever you want to go
     } catch (error: any) {
       console.error("Submission Error:", error);
       alert(error.message || "An unexpected error occurred");
@@ -331,7 +479,7 @@ export default function CreateListingPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
-              List your space
+              {isEditMode ? "Edit your space" : "List your space"}
             </h1>
             <p className="text-slate-500 mt-2">
               Fill in the details to start reaching guests.
@@ -697,7 +845,11 @@ export default function CreateListingPage() {
               disabled={submitting}
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-6 rounded-xl text-lg font-bold shadow-lg shadow-emerald-200 transition-all active:scale-[0.98]"
             >
-              {submitting ? "Publishing..." : "List Property"}
+              {submitting
+                ? "Saving..."
+                : isEditMode
+                  ? "Save Changes"
+                  : "List Property"}
             </Button>
           </div>
         </form>

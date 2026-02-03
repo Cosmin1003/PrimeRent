@@ -52,6 +52,7 @@ function App() {
           <Route path="/host/dashboard" element={<HostDashboardPage />} />
           <Route path="/host/reservations" element={<HostReservationsPage />} />
           <Route path="/host/create-listing" element={<CreateListingPage />} />
+          <Route path="/host/edit-listing/:id" element={<CreateListingPage />} />
           <Route path="/host/manage-listings" element={<ManageListingsPage />} />
         </Routes>
       </main>
