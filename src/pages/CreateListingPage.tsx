@@ -275,7 +275,7 @@ export default function CreateListingPage() {
       if (!user) throw new Error("Authentication required");
 
       // 2. Validation
-      if (images.length === 0) {
+      if (images.length === 0 && previews.length === 0) {
         throw new Error("Please upload at least one image for your property.");
       }
 
@@ -421,9 +421,9 @@ export default function CreateListingPage() {
         }
       }
 
-      // 3. Create Property Record First (to get the ID)
+      if (isEditMode) alert("Property updated successfully!");
+      else alert("Property listed successfully!");
 
-      alert("Property listed successfully!");
       navigate("/host/manage-listings"); // or wherever you want to go
     } catch (error: any) {
       console.error("Submission Error:", error);
