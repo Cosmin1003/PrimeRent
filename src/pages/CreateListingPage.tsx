@@ -303,7 +303,7 @@ export default function CreateListingPage() {
             {/* MAP SECTION */}
             <div className="space-y-4">
               <Label>Set Exact Location (Click on Map)</Label>
-              <div className="h-72 w-full rounded-2xl overflow-hidden border border-slate-200 z-0">
+              <div className="h-72 w-full rounded-2xl overflow-hidden border border-slate-200 relative z-10">
                 <MapContainer
                   center={[formData.lat, formData.lng]}
                   zoom={13}
