@@ -16,6 +16,9 @@ import {
   AlertCircle,
   Check,
   Sparkles,
+  X,
+  UploadCloud,
+  ImageIcon,
 } from "lucide-react";
 
 // --- Leaflet Imports ---
@@ -74,6 +77,9 @@ export default function CreateListingPage() {
   const [allAmenities, setAllAmenities] = useState<Amenity[]>([]);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
+  const [images, setImages] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+
   // Form State
   const [formData, setFormData] = useState({
     title: "",
@@ -90,6 +96,33 @@ export default function CreateListingPage() {
     main_image:
       "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
   });
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+
+      // Add raw files to state
+      setImages((prev) => [...prev, ...newFiles]);
+
+      // Generate preview URLs
+      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+      setPreviews((prev) => [...prev, ...newPreviews]);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+
+    // Revoke URL to prevent memory leaks
+    URL.revokeObjectURL(previews[index]);
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  useEffect(() => {
+    return () => {
+      previews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   useEffect(() => {
     checkHostRole();
@@ -146,32 +179,18 @@ export default function CreateListingPage() {
     setSubmitting(true);
 
     try {
+      // 1. Auth Check
       const {
         data: { user },
       } = await supabase.auth.getUser();
-
       if (!user) throw new Error("Authentication required");
 
-      const latitude =
-        typeof formData.lat === "string"
-          ? parseFloat(formData.lat)
-          : formData.lat;
-      const longitude =
-        typeof formData.lng === "string"
-          ? parseFloat(formData.lng)
-          : formData.lng;
-
-      if (
-        latitude < -90 ||
-        latitude > 90 ||
-        longitude < -180 ||
-        longitude > 180
-      ) {
-        throw new Error(
-          "Please provide valid coordinates. Lat: -90 to 90, Lng: -180 to 180.",
-        );
+      // 2. Validation
+      if (images.length === 0) {
+        throw new Error("Please upload at least one image for your property.");
       }
 
+      // 3. Create Property Record First (to get the ID)
       const { data: property, error: propError } = await supabase
         .from("properties")
         .insert([
@@ -179,6 +198,9 @@ export default function CreateListingPage() {
             ...formData,
             host_id: user.id,
             price_per_night: parseFloat(formData.price_per_night),
+            // We set the main_image temporarily to null or a placeholder
+            // We will update it after uploading the images
+            main_image: null,
             is_active: true,
           },
         ])
@@ -187,10 +209,62 @@ export default function CreateListingPage() {
 
       if (propError) throw propError;
 
-      // 2. Insert Amenities Relationships
+      const propertyId = property.id;
+      const uploadedImageUrls: string[] = [];
+
+      // 4. Upload Images to Supabase Storage
+      // Folder structure: properties/{propertyId}/{fileName}
+      const uploadPromises = images.map(async (image) => {
+        const fileExt = image.name.split(".").pop();
+        // Create unique filename to prevent overwrites
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `${propertyId}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("properties")
+          .upload(filePath, image);
+
+        if (uploadError) throw uploadError;
+
+        // Get Public URL
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("properties").getPublicUrl(filePath);
+
+        return publicUrl;
+      });
+
+      // Wait for all uploads to finish
+      const urls = await Promise.all(uploadPromises);
+      uploadedImageUrls.push(...urls);
+
+      // 5. Insert into property_images table
+      const imageRecords = uploadedImageUrls.map((url, index) => ({
+        property_id: propertyId,
+        url: url,
+        display_order: index,
+      }));
+
+      const { error: imgTableError } = await supabase
+        .from("property_images")
+        .insert(imageRecords);
+
+      if (imgTableError) throw imgTableError;
+
+      // 6. Update the main 'properties' table with the first image as the cover
+      if (uploadedImageUrls.length > 0) {
+        const { error: updateError } = await supabase
+          .from("properties")
+          .update({ main_image: uploadedImageUrls[0] })
+          .eq("id", propertyId);
+
+        if (updateError) throw updateError;
+      }
+
+      // 7. Insert Amenities (Existing Logic)
       if (selectedAmenities.length > 0) {
         const amenityRelations = selectedAmenities.map((amenityId) => ({
-          property_id: property.id,
+          property_id: propertyId,
           amenity_id: amenityId,
         }));
 
@@ -202,9 +276,10 @@ export default function CreateListingPage() {
       }
 
       alert("Property listed successfully!");
-      navigate("/explore");
+      navigate("/explore"); // or wherever you want to go
     } catch (error: any) {
-      alert(error.message);
+      console.error("Submission Error:", error);
+      alert(error.message || "An unexpected error occurred");
     } finally {
       setSubmitting(false);
     }
@@ -301,6 +376,63 @@ export default function CreateListingPage() {
                   setFormData({ ...formData, description: e.target.value })
                 }
               />
+            </div>
+          </div>
+
+          {/* --- IMAGE UPLOAD SECTION --- */}
+          <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm space-y-6">
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <ImageIcon className="text-emerald-600" size={20} /> Photos
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Upload Area */}
+              <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-slate-50 transition-colors relative">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div className="bg-emerald-100 p-4 rounded-full mb-4">
+                  <UploadCloud className="text-emerald-600" size={24} />
+                </div>
+                <h4 className="font-semibold text-slate-900">
+                  Click to upload photos
+                </h4>
+                <p className="text-sm text-slate-500 mt-1">
+                  SVG, PNG, JPG or GIF (max 5MB)
+                </p>
+              </div>
+
+              {/* Previews */}
+              <div className="grid grid-cols-2 gap-4 max-h-80 overflow-y-auto">
+                {previews.map((url, index) => (
+                  <div
+                    key={index}
+                    className="relative group aspect-square rounded-xl overflow-hidden border border-slate-200"
+                  >
+                    <img
+                      src={url}
+                      alt={`Preview ${index}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 bg-white/90 p-1.5 rounded-full text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white cursor-pointer"
+                    >
+                      <X size={16} />
+                    </button>
+                    {index === 0 && (
+                      <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded">
+                        MAIN COVER
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -514,8 +646,10 @@ export default function CreateListingPage() {
             <h3 className="text-xl font-bold flex items-center gap-2">
               <Sparkles className="text-emerald-600" size={20} /> Amenities
             </h3>
-            <p className="text-sm text-slate-500">Select all that apply to your property.</p>
-            
+            <p className="text-sm text-slate-500">
+              Select all that apply to your property.
+            </p>
+
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {allAmenities.map((amenity) => {
                 const isSelected = selectedAmenities.includes(amenity.id);
@@ -526,15 +660,22 @@ export default function CreateListingPage() {
                     onClick={() => toggleAmenity(amenity.id)}
                     className={cn(
                       "flex items-center justify-between p-4 rounded-xl border transition-all text-left cursor-pointer",
-                      isSelected 
-                        ? "border-emerald-600 bg-emerald-50/50 ring-1 ring-emerald-600" 
-                        : "border-slate-200 bg-white hover:border-slate-300"
+                      isSelected
+                        ? "border-emerald-600 bg-emerald-50/50 ring-1 ring-emerald-600"
+                        : "border-slate-200 bg-white hover:border-slate-300",
                     )}
                   >
-                    <span className={cn("text-sm font-medium", isSelected ? "text-emerald-900" : "text-slate-600")}>
+                    <span
+                      className={cn(
+                        "text-sm font-medium",
+                        isSelected ? "text-emerald-900" : "text-slate-600",
+                      )}
+                    >
                       {amenity.name}
                     </span>
-                    {isSelected && <Check size={16} className="text-emerald-600" />}
+                    {isSelected && (
+                      <Check size={16} className="text-emerald-600" />
+                    )}
                   </button>
                 );
               })}
