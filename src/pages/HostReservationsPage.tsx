@@ -8,7 +8,7 @@ import { Check, X, Home, User, Loader2, Rocket } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
-export default function HostReservationPage() {
+export default function HostReservationsPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);

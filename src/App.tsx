@@ -11,7 +11,7 @@ import FavoritesPage from "./pages/FavoritesPage";
 import Footer from "./components/Footer";
 import ProfilePage from "./pages/ProfilePage";
 import HostDashboardPage from "./pages/HostDashboardPage";
-import HostReservationPage from "./pages/HostReservationPage";
+import HostReservationsPage from "./pages/HostReservationsPage";
 import CreateListingPage from "./pages/CreateListingPage";
 
 function App() {
@@ -49,7 +49,7 @@ function App() {
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/host/dashboard" element={<HostDashboardPage />} />
-          <Route path="/host/reservations" element={<HostReservationPage />} />
+          <Route path="/host/reservations" element={<HostReservationsPage />} />
           <Route path="/host/create-listing" element={<CreateListingPage />} />
         </Routes>
       </main>
