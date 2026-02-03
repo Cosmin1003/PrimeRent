@@ -14,6 +14,8 @@ import {
   ChevronLeft,
   PlusCircle,
   AlertCircle,
+  Check,
+  Sparkles,
 } from "lucide-react";
 
 // --- Leaflet Imports ---
@@ -27,6 +29,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import type { Amenity } from "@/types/amenity";
+import { cn } from "@/lib/utils";
 
 // --- Leaflet Icon Fix ---
 // This is necessary because Vite/Webpack messes up the default paths for Leaflet marker icons
@@ -67,6 +71,9 @@ export default function CreateListingPage() {
   const [isHost, setIsHost] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  const [allAmenities, setAllAmenities] = useState<Amenity[]>([]);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+
   // Form State
   const [formData, setFormData] = useState({
     title: "",
@@ -86,6 +93,7 @@ export default function CreateListingPage() {
 
   useEffect(() => {
     checkHostRole();
+    fetchAmenities();
   }, []);
 
   async function checkHostRole() {
@@ -114,6 +122,17 @@ export default function CreateListingPage() {
     }
   }
 
+  async function fetchAmenities() {
+    const { data } = await supabase.from("amenities").select("*").order("name");
+    if (data) setAllAmenities(data);
+  }
+
+  const toggleAmenity = (id: string) => {
+    setSelectedAmenities((prev) =>
+      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id],
+    );
+  };
+
   function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
     const map = useMapEvents({});
     useEffect(() => {
@@ -130,6 +149,8 @@ export default function CreateListingPage() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+
+      if (!user) throw new Error("Authentication required");
 
       const latitude =
         typeof formData.lat === "string"
@@ -151,16 +172,34 @@ export default function CreateListingPage() {
         );
       }
 
-      const { error } = await supabase.from("properties").insert([
-        {
-          ...formData,
-          host_id: user?.id,
-          price_per_night: parseFloat(formData.price_per_night),
-          is_active: true,
-        },
-      ]);
+      const { data: property, error: propError } = await supabase
+        .from("properties")
+        .insert([
+          {
+            ...formData,
+            host_id: user.id,
+            price_per_night: parseFloat(formData.price_per_night),
+            is_active: true,
+          },
+        ])
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (propError) throw propError;
+
+      // 2. Insert Amenities Relationships
+      if (selectedAmenities.length > 0) {
+        const amenityRelations = selectedAmenities.map((amenityId) => ({
+          property_id: property.id,
+          amenity_id: amenityId,
+        }));
+
+        const { error: amenityError } = await supabase
+          .from("property_amenities")
+          .insert(amenityRelations);
+
+        if (amenityError) throw amenityError;
+      }
 
       alert("Property listed successfully!");
       navigate("/explore");
@@ -467,6 +506,38 @@ export default function CreateListingPage() {
                   }
                 />
               </div>
+            </div>
+          </div>
+
+          {/* --- AMENITIES SECTION --- */}
+          <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm space-y-6">
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <Sparkles className="text-emerald-600" size={20} /> Amenities
+            </h3>
+            <p className="text-sm text-slate-500">Select all that apply to your property.</p>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {allAmenities.map((amenity) => {
+                const isSelected = selectedAmenities.includes(amenity.id);
+                return (
+                  <button
+                    key={amenity.id}
+                    type="button"
+                    onClick={() => toggleAmenity(amenity.id)}
+                    className={cn(
+                      "flex items-center justify-between p-4 rounded-xl border transition-all text-left cursor-pointer",
+                      isSelected 
+                        ? "border-emerald-600 bg-emerald-50/50 ring-1 ring-emerald-600" 
+                        : "border-slate-200 bg-white hover:border-slate-300"
+                    )}
+                  >
+                    <span className={cn("text-sm font-medium", isSelected ? "text-emerald-900" : "text-slate-600")}>
+                      {amenity.name}
+                    </span>
+                    {isSelected && <Check size={16} className="text-emerald-600" />}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
