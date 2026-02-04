@@ -237,6 +237,10 @@ export default function PropertyPage() {
     });
   };
 
+  // Add this helper near the top of your component or file
+  const FUNCTION_URL =
+    "https://dzmfdjgoxsvlzesjvhob.supabase.co/functions/v1/create-checkout";
+
   const handleReserve = async () => {
     if (!date?.from || !date?.to || !userId) {
       alert("Please log in and select dates");
@@ -246,26 +250,46 @@ export default function PropertyPage() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.rpc("create_booking", {
-        p_property_id: id,
-        p_guest_id: userId,
-        p_check_in: format(date.from, "yyyy-MM-dd"),
-        p_check_out: format(date.to, "yyyy-MM-dd"),
-        p_total_price: totalPrice,
-        p_guest_count: guestCount,
+      // 1. Get the current user's token
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      if (!token) {
+        alert("Please sign in to book.");
+        setLoading(false);
+        return;
+      }
+
+      // 2. Call the Supabase Edge Function
+      const response = await fetch(FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Pass the token securely
+        },
+        body: JSON.stringify({
+          property_id: id,
+          check_in: format(date.from, "yyyy-MM-dd"),
+          check_out: format(date.to, "yyyy-MM-dd"),
+          guest_count: guestCount,
+        }),
       });
 
-      if (error) throw error;
+      const data = await response.json();
 
-      if (data.success) {
-        alert("Success! Your stay is booked.");
-        navigate("/bookings");
-      } else {
-        alert(`Booking failed: ${data.message}`);
+      if (!response.ok) {
+        throw new Error(data.error || "Booking failed");
+      }
+
+      // 3. Redirect to Stripe
+      if (data.url) {
+        window.location.href = data.url;
       }
     } catch (err: any) {
-      console.error(err);
-      alert("An unexpected error occurred.");
+      console.error("Booking Error:", err);
+      alert(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
