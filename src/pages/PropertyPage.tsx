@@ -57,6 +57,11 @@ export default function PropertyPage() {
     reviewsRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const mapRef = useRef<HTMLDivElement>(null);
+  const scrollToMap = () => {
+    mapRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const galleryImages = property?.property_images || [];
 
@@ -329,9 +334,11 @@ export default function PropertyPage() {
                     : "New"}
                 </span>
               </div>
-              <span>
-                {property.city}, {property.address}
-              </span>
+              <div onClick={scrollToMap} className="cursor-pointer">
+                <span>
+                  {property.city}, {property.address}
+                </span>
+              </div>
             </div>
             <div className="flex gap-6">
               <ShadButton
@@ -905,7 +912,10 @@ export default function PropertyPage() {
       </Dialog>
 
       {/* Property Map Section */}
-      <div className="container max-w-6xl mx-auto px-4 md:px-6">
+      <div
+        ref={mapRef}
+        className="container max-w-6xl mx-auto px-4 md:px-6 scroll-mt-20"
+      >
         {" "}
         {/* Ensure this wrapper exists */}
         <Separator className="my-12" />
