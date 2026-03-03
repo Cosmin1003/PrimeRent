@@ -77,6 +77,8 @@ export default function CreateListingPage() {
   const [isHost, setIsHost] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const [allAmenities, setAllAmenities] = useState<Amenity[]>([]);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
@@ -99,6 +101,73 @@ export default function CreateListingPage() {
     main_image:
       "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
   });
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        // reader.result looks like "data:image/jpeg;base64,/9j/4AAQSkZ..."
+        // We only want the raw data part after the comma
+        const base64String = (reader.result as string).split(',')[1];
+        resolve(base64String);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const handleGenerateDescription = async () => {
+    setIsGenerating(true);
+    try {
+      const amenityNames = selectedAmenities
+        .map((id) => allAmenities.find((a) => a.id === id)?.name)
+        .filter(Boolean)
+        .join(", ");
+
+      const facts = `
+        Location: ${formData.address ? formData.address + ', ' : ''}${formData.city}
+        Price: $${formData.price_per_night} per night
+        Capacity: ${formData.max_guests} guests
+        Layout: ${formData.bedrooms} bedrooms, ${formData.beds} beds, ${formData.bathrooms} baths.
+        Amenities included: ${amenityNames || "Basic amenities"}
+      `;
+
+      // --- NEW: Grab the first image if the user uploaded one! ---
+      let base64Data = null;
+      let mimeType = null;
+      
+      if (images.length > 0) {
+        // Grab the very first file they uploaded
+        const coverImage = images[0]; 
+        base64Data = await fileToBase64(coverImage);
+        mimeType = coverImage.type; // e.g., "image/jpeg" or "image/png"
+      }
+
+      // Call your secure Supabase Edge Function, now with image data!
+      const { data, error } = await supabase.functions.invoke('generate-listing', {
+        body: { 
+          formData: facts,
+          imageBase64: base64Data,
+          mimeType: mimeType
+        }
+      });
+
+      if (error) throw error;
+
+      setFormData((prev) => ({ 
+        ...prev, 
+        title: data.title,
+        description: data.description
+      }));
+      
+    } catch (error: any) {
+      console.error("AI Generation failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate description";
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -493,10 +562,27 @@ export default function CreateListingPage() {
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* --- BASIC INFO --- */}
           <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm space-y-6">
-            <h3 className="text-xl font-bold flex items-center gap-2">
-              <Building2 className="text-emerald-600" size={20} /> General
-              Information
-            </h3>
+            
+            {/* Header and Button Container */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                <Building2 className="text-emerald-600" size={20} /> General
+                Information
+              </h3>
+              
+              {/* AI MAGIC BUTTON (Moved to the top!) */}
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={handleGenerateDescription}
+                disabled={isGenerating || !formData.city} 
+                className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 transition-colors w-full sm:w-auto cursor-pointer"
+              >
+                <Sparkles size={16} className="mr-2" />
+                {isGenerating ? "AI is writing..." : "Auto-Generate Title & Description"}
+              </Button>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="title">Property Title</Label>
