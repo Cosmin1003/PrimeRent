@@ -3,7 +3,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "../supabaseClient";
-import { Star, Share, Heart, ChevronLeft, Minus, Plus } from "lucide-react";
+import { Star, Share, Heart, ChevronLeft, Minus, Plus, Sparkles } from "lucide-react";
 
 import { Button, Button as ShadButton } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -51,6 +51,9 @@ export default function PropertyPage() {
 
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
+
+  const [aiSummary, setAiSummary] = useState<{ summary: string; pros: string[]; cons: string[] } | null>(null);
+  const [isSummarizing, setIsSummarizing] = useState(false);
 
   const reviewsRef = useRef<HTMLDivElement>(null);
   const scrollToReviews = () => {
@@ -297,6 +300,29 @@ export default function PropertyPage() {
       alert(`Error: ${err.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateSummary = async () => {
+    if (reviews.length === 0) return;
+    setIsSummarizing(true);
+    
+    try {
+      // Extract just the comments, ignoring empty ones
+      const reviewTexts = reviews.map(r => r.comment).filter(Boolean);
+      
+      const { data, error } = await supabase.functions.invoke('summarize-reviews', {
+        body: { reviews: reviewTexts }
+      });
+
+      if (error) throw error;
+      setAiSummary(data);
+      
+    } catch (error: any) {
+      console.error("AI Summary failed:", error);
+      alert(`Error: ${error.message || "Failed to summarize reviews"}`);
+    } finally {
+      setIsSummarizing(false);
     }
   };
 
@@ -727,17 +753,77 @@ export default function PropertyPage() {
         <Separator className="my-12" />
 
         <section className="pb-12">
-          {/* Header with Star and Total Count */}
-          <div className="flex items-center gap-2 text-2xl font-bold mb-8 text-emerald-700">
-            <Star className="size-6 fill-emerald-600 text-emerald-600" />
-            <span>
-              {property.avg_rating > 0 ? property.avg_rating.toFixed(2) : "New"}
-            </span>
-            <span className="text-emerald-600">•</span>
-            <span>
-              {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
-            </span>
+          {/* Header with Star, Total Count, and AI Button */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+            <div className="flex items-center gap-2 text-2xl font-bold text-emerald-700">
+              <Star className="size-6 fill-emerald-600 text-emerald-600" />
+              <span>
+                {property.avg_rating > 0 ? property.avg_rating.toFixed(2) : "New"}
+              </span>
+              <span className="text-emerald-600">•</span>
+              <span>
+                {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+              </span>
+            </div>
+
+            {/* The AI Button (Only show if there are reviews and no summary yet) */}
+            {reviews.length > 0 && !aiSummary && (
+              <ShadButton 
+                variant="outline" 
+                onClick={handleGenerateSummary} 
+                disabled={isSummarizing}
+                className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 transition-colors w-full sm:w-auto cursor-pointer"
+              >
+                <Sparkles size={16} className="mr-2" />
+                {isSummarizing ? "Analyzing reviews..." : "Summarize with AI"}
+              </ShadButton>
+            )}
           </div>
+
+          {/* AI Summary Result Card */}
+          {aiSummary && (
+            <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-6 mb-10 animate-in fade-in slide-in-from-bottom-4">
+              <div className="flex items-center gap-2 text-emerald-800 font-bold mb-3">
+                <Sparkles className="size-5" />
+                <h3>AI Review Summary</h3>
+              </div>
+              <p className="text-gray-700 leading-relaxed mb-6">
+                {aiSummary.summary}
+              </p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {/* Pros */}
+                {aiSummary.pros && aiSummary.pros.length > 0 && (
+                  <div>
+                    <h4 className="font-bold text-gray-900 mb-2 text-sm uppercase">Guests loved</h4>
+                    <ul className="space-y-2">
+                      {aiSummary.pros.map((pro, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-gray-700 text-sm">
+                          <Plus className="size-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                          {pro}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {/* Cons */}
+                {aiSummary.cons && aiSummary.cons.length > 0 && (
+                  <div>
+                    <h4 className="font-bold text-gray-900 mb-2 text-sm uppercase">Some mentioned</h4>
+                    <ul className="space-y-2">
+                      {aiSummary.cons.map((con, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-gray-700 text-sm">
+                          <Minus className="size-4 text-red-500 flex-shrink-0 mt-0.5" />
+                          {con}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* 2x2 Grid for the first 4 reviews */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10">
