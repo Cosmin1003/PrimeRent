@@ -14,6 +14,7 @@ import HostDashboardPage from "./pages/HostDashboardPage";
 import HostReservationsPage from "./pages/HostReservationsPage";
 import CreateListingPage from "./pages/CreateListingPage";
 import ManageListingsPage from "./pages/ManageListingsPage";
+import AdminEmbeddingsPage from "./pages/AdminEmbeddingsPage";
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -54,6 +55,7 @@ function App() {
           <Route path="/host/create-listing" element={<CreateListingPage />} />
           <Route path="/host/edit-listing/:id" element={<CreateListingPage />} />
           <Route path="/host/manage-listings" element={<ManageListingsPage />} />
+          <Route path="/admin/embeddings" element={<AdminEmbeddingsPage />} />
         </Routes>
       </main>
       <Footer />

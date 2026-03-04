@@ -12,6 +12,8 @@ import {
   SlidersHorizontal,
   ArrowUpDown,
   Heart,
+  Loader2,
+  Sparkles,
 } from "lucide-react";
 import { format } from "date-fns";
 import { type DateRange } from "react-day-picker";
@@ -67,6 +69,9 @@ export default function ExplorePage() {
   });
 
   const [userId, setUserId] = useState<string | undefined>();
+
+  const [aiQuery, setAiQuery] = useState("");
+  const [isAiSearching, setIsAiSearching] = useState(false);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -165,281 +170,353 @@ export default function ExplorePage() {
     return 0; // default
   });
 
+  const handleSmartSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!aiQuery.trim()) return;
+
+    setIsAiSearching(true);
+    setLoading(true); // Re-use your existing loading state
+
+    try {
+      const { data, error } = await supabase.functions.invoke("smart-search", {
+        body: { userQuery: aiQuery },
+      });
+
+      if (error) throw error;
+
+      // Update your UI filters to match what the AI understood
+      if (data.filters.location) setLocation(data.filters.location);
+      if (data.filters.guests) setGuests(data.filters.guests);
+
+      // Override the properties grid with the AI's semantic matches
+      setProperties(data.properties || []);
+    } catch (error) {
+      console.error("AI Search Error:", error);
+      // Optional: Add a toast notification here to tell the user it failed
+    } finally {
+      setIsAiSearching(false);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-white md:bg-gray-50 pt-15 pb-20">
       <div className="container max-w-7xl mx-auto px-4 md:px-6">
         {/* --- DESKTOP TOP BAR (Search + Filter Separated) --- */}
-        <div className="hidden md:flex items-center justify-center gap-4 mb-12">
-          {/* --- SORT BUTTON --- */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="hidden md:flex rounded-full h-14 px-6! border-gray-200 bg-white hover:bg-gray-50 shadow-md gap-2"
-              >
-                <ArrowUpDown className="size-4" />
-                <span className="font-bold">Sort</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="rounded-2xl w-56 p-2">
-              {[
-                { id: "default", label: "Default" },
-                { id: "rating-desc", label: "Top Rated" },
-                { id: "price-asc", label: "Price: Low to High" },
-                { id: "price-desc", label: "Price: High to Low" },
-              ].map((item) => (
-                <DropdownMenuItem
-                  key={item.id}
-                  className={cn(
-                    "cursor-pointer flex items-center justify-between rounded-xl px-3 py-2",
-                    sortBy === item.id
-                      ? "bg-emerald-50 text-emerald-900 font-semibold"
-                      : "",
-                  )}
-                  onClick={() => setSortBy(item.id)}
+        <div className="hidden md:flex flex-col items-center justify-center w-full mb-12">
+          {/* ROW 1: Traditional Search, Sort, and Filters */}
+          <div className="flex items-center justify-center gap-4 w-full">
+            {/* --- SORT BUTTON --- */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="hidden md:flex rounded-full h-14 px-6! border-gray-200 bg-white hover:bg-gray-50 shadow-md gap-2 cursor-pointer"
                 >
-                  {item.label}
-                  {sortBy === item.id && (
-                    <Check className="size-4 text-emerald-600" />
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  <ArrowUpDown className="size-4" />
+                  <span className="font-bold">Sort</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="rounded-2xl w-56 p-2"
+              >
+                {[
+                  { id: "default", label: "Default" },
+                  { id: "rating-desc", label: "Top Rated" },
+                  { id: "price-asc", label: "Price: Low to High" },
+                  { id: "price-desc", label: "Price: High to Low" },
+                ].map((item) => (
+                  <DropdownMenuItem
+                    key={item.id}
+                    className={cn(
+                      "cursor-pointer flex items-center justify-between rounded-xl px-3 py-2",
+                      sortBy === item.id
+                        ? "bg-emerald-50 text-emerald-900 font-semibold"
+                        : "",
+                    )}
+                    onClick={() => setSortBy(item.id)}
+                  >
+                    {item.label}
+                    {sortBy === item.id && (
+                      <Check className="size-4 text-emerald-600" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          {/* 1. SEARCH BAR (The Pill) - your existing code follows... */}
-
-          {/* 1. SEARCH BAR (The Pill) */}
-          <div className="flex flex-1 bg-white p-2 rounded-full shadow-lg border border-gray-200 items-center max-w-4xl">
-            {/* Location */}
-            <div className="flex flex-[1.2] items-center gap-3 px-6 py-2 border-r border-gray-200 group">
-              <MapPin className="text-emerald-600 size-5" />
-              <div className="flex flex-col w-full relative">
-                <span className="text-[10px] font-extrabold uppercase text-gray-500">
-                  Where
-                </span>
-                <div className="flex items-center group">
-                  <input
-                    placeholder="Search destinations"
-                    className="bg-transparent border-none focus:outline-none text-sm font-semibold placeholder:text-gray-400 w-full"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                  />
-                  {location && (
-                    <button
-                      onClick={() => setLocation("")}
-                      className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600 cursor-pointer"
-                    >
-                      <Plus className="rotate-45 size-4" />
-                    </button>
-                  )}
+            {/* 1. SEARCH BAR (The Pill) */}
+            <div className="flex flex-1 bg-white p-2 rounded-full shadow-lg border border-gray-200 items-center max-w-4xl">
+              {/* Location */}
+              <div className="flex flex-[1.2] items-center gap-3 px-6 py-2 border-r border-gray-200 group">
+                <MapPin className="text-emerald-600 size-5" />
+                <div className="flex flex-col w-full relative">
+                  <span className="text-[10px] font-extrabold uppercase text-gray-500">
+                    Where
+                  </span>
+                  <div className="flex items-center group">
+                    <input
+                      placeholder="Search destinations"
+                      className="bg-transparent border-none focus:outline-none text-sm font-semibold placeholder:text-gray-400 w-full"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    />
+                    {location && (
+                      <button
+                        onClick={() => setLocation("")}
+                        className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600 cursor-pointer"
+                      >
+                        <Plus className="rotate-45 size-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Date Range Picker */}
-            <div className="flex-1 border-r border-gray-200">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="flex items-center gap-3 px-6 py-2 w-full text-left hover:bg-gray-50/50 rounded-none transition-colors cursor-pointer">
-                    <CalendarIcon className="text-emerald-600 size-5" />
-                    <div className="flex flex-col overflow-hidden">
-                      <span className="text-[10px] font-extrabold uppercase text-gray-500">
-                        When
-                      </span>
-                      <span
-                        className={cn(
-                          "text-sm font-semibold truncate",
-                          !date?.from && "text-gray-400 font-normal",
-                        )}
-                      >
-                        {date?.from
-                          ? date.to
-                            ? `${format(date.from, "MMM dd")} - ${format(date.to, "MMM dd")}`
-                            : format(date.from, "MMM dd")
-                          : "Add dates"}
-                      </span>
-                    </div>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto p-0 rounded-3xl"
-                  align="center"
-                >
-                  <div className="p-4 border-b flex justify-between items-center">
-                    <span className="text-sm font-bold">Select Dates</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        setDate({ from: undefined, to: undefined })
-                      }
-                      className="text-xs underline"
-                    >
-                      Clear dates
-                    </Button>
-                  </div>
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    selected={date}
-                    onSelect={setDate}
-                    numberOfMonths={2}
-                    disabled={(date) =>
-                      date < new Date(new Date().setHours(0, 0, 0, 0))
-                    }
-                    classNames={{
-                      day: cn(
-                        "[&_[data-range-start=true]]:!bg-emerald-600 [&_[data-range-start=true]]:!text-white",
-                        "[&_[data-range-end=true]]:!bg-emerald-600 [&_[data-range-end=true]]:!text-white",
-                        "[&_[data-range-middle=true]]:!bg-emerald-100 [&_[data-range-middle=true]]:!text-emerald-900",
-                        "[&_[data-selected-single=true]]:!bg-emerald-600 [&_[data-selected-single=true]]:!text-white",
-                      ),
-                      range_start: "!bg-emerald-600 !rounded-l-md",
-                      range_end: "!bg-emerald-600 !rounded-r-md",
-                      range_middle: "!bg-emerald-100",
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Guests */}
-            <div className="flex flex-1 items-center gap-3 px-6 py-2">
-              <Users className="text-emerald-600 size-5" />
-              <div className="flex flex-col w-full">
-                <span className="text-[10px] font-extrabold uppercase text-gray-500">
-                  Who
-                </span>
+              {/* Date Range Picker */}
+              <div className="flex-1 border-r border-gray-200">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className="text-sm font-semibold text-left hover:text-emerald-600 transition-colors cursor-pointer">
-                      {guests === 1 ? "1 guest" : `${guests} guests`}
+                    <button className="flex items-center gap-3 px-6 py-2 w-full text-left hover:bg-gray-50/50 rounded-none transition-colors cursor-pointer">
+                      <CalendarIcon className="text-emerald-600 size-5" />
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="text-[10px] font-extrabold uppercase text-gray-500">
+                          When
+                        </span>
+                        <span
+                          className={cn(
+                            "text-sm font-semibold truncate",
+                            !date?.from && "text-gray-400 font-normal",
+                          )}
+                        >
+                          {date?.from
+                            ? date.to
+                              ? `${format(date.from, "MMM dd")} - ${format(date.to, "MMM dd")}`
+                              : format(date.from, "MMM dd")
+                            : "Add dates"}
+                        </span>
+                      </div>
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-72 p-6 rounded-3xl" align="end">
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-gray-900">
-                          Number of Guests
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <button
-                          onClick={() => setGuests(Math.max(1, guests - 1))}
-                          disabled={guests <= 1}
-                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black disabled:opacity-30 transition-all enabled:cursor-pointer disabled:cursor-not-allowed"
-                        >
-                          <Minus className="size-4" />
-                        </button>
-                        <span className="w-4 text-center font-semibold tabular-nums">
-                          {guests}
-                        </span>
-                        <button
-                          onClick={() => setGuests(guests + 1)}
-                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black transition-all cursor-pointer"
-                        >
-                          <Plus className="size-4" />
-                        </button>
-                      </div>
+                  <PopoverContent
+                    className="w-auto p-0 rounded-3xl"
+                    align="center"
+                  >
+                    <div className="p-4 border-b flex justify-between items-center">
+                      <span className="text-sm font-bold">Select Dates</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          setDate({ from: undefined, to: undefined })
+                        }
+                        className="text-xs underline cursor-pointer"
+                      >
+                        Clear dates
+                      </Button>
                     </div>
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      selected={date}
+                      onSelect={setDate}
+                      numberOfMonths={2}
+                      disabled={(date) =>
+                        date < new Date(new Date().setHours(0, 0, 0, 0))
+                      }
+                      classNames={{
+                        day: cn(
+                          "[&_[data-range-start=true]]:!bg-emerald-600 [&_[data-range-start=true]]:!text-white",
+                          "[&_[data-range-end=true]]:!bg-emerald-600 [&_[data-range-end=true]]:!text-white",
+                          "[&_[data-range-middle=true]]:!bg-emerald-100 [&_[data-range-middle=true]]:!text-emerald-900",
+                          "[&_[data-selected-single=true]]:!bg-emerald-600 [&_[data-selected-single=true]]:!text-white",
+                        ),
+                        range_start: "!bg-emerald-600 !rounded-l-md",
+                        range_end: "!bg-emerald-600 !rounded-r-md",
+                        range_middle: "!bg-emerald-100",
+                      }}
+                    />
                   </PopoverContent>
                 </Popover>
               </div>
-            </div>
 
-            <div className="relative flex items-center pr-2">
-              {/* Absolute "Clear all" button */}
-              {isFiltered && (
-                <button
-                  onClick={resetFilters}
-                  className="absolute py-2 -left-20 text-xs font-bold text-gray-500 hover:text-black underline underline-offset-4 transition-colors whitespace-nowrap cursor-pointer"
-                >
-                  Clear all
-                </button>
-              )}
-
-              <Button
-                onClick={fetchProperties}
-                className="bg-emerald-600 hover:bg-emerald-700 rounded-full h-12 px-6 transition-all active:scale-95"
-              >
-                <Search className="size-5 mr-2" />
-                <span className="font-bold">Search</span>
-              </Button>
-            </div>
-          </div>
-
-          {/* 2. FILTER BUTTON */}
-          <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                onClick={() => setTempSelectedAmenities(selectedAmenities)}
-                className="rounded-full h-14 !px-6 border-gray-200 bg-white hover:bg-gray-50 shadow-md flex gap-2"
-              >
-                <SlidersHorizontal className="size-4" />
-                <span className="font-bold">Filters</span>
-                {selectedAmenities.length > 0 && (
-                  <span className="bg-black text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
-                    {selectedAmenities.length}
+              {/* Guests */}
+              <div className="flex flex-1 items-center gap-3 px-6 py-2">
+                <Users className="text-emerald-600 size-5" />
+                <div className="flex flex-col w-full">
+                  <span className="text-[10px] font-extrabold uppercase text-gray-500">
+                    Who
                   </span>
-                )}
-              </Button>
-            </DialogTrigger>
-
-            {/* DIALOG CONTENT: This must be rendered in a Portal to center on screen */}
-            <DialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-white p-0 shadow-lg duration-200 sm:rounded-3xl overflow-hidden">
-              <DialogHeader className="p-6 border-b">
-                <DialogTitle className="text-xl font-bold text-center">
-                  Filters
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="flex-1 overflow-y-auto p-6 max-h-[60vh]">
-                <h3 className="text-lg font-semibold mb-4">Amenities</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {allAmenities.map((amenity) => (
-                    <div
-                      key={amenity.id}
-                      className="flex items-center justify-between cursor-pointer p-2 hover:bg-gray-50 rounded-lg"
-                      onClick={() => toggleTempAmenity(amenity.id)}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="text-sm font-semibold text-left hover:text-emerald-600 transition-colors cursor-pointer">
+                        {guests === 1 ? "1 guest" : `${guests} guests`}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-72 p-6 rounded-3xl"
+                      align="end"
                     >
-                      <label className="text-sm font-medium cursor-pointer">
-                        {amenity.name}
-                      </label>
-                      <div
-                        className={cn(
-                          "w-6 h-6 rounded-md border flex items-center justify-center transition-colors",
-                          tempSelectedAmenities.includes(amenity.id)
-                            ? "bg-emerald-600 border-emerald-600"
-                            : "border-gray-300",
-                        )}
-                      >
-                        {tempSelectedAmenities.includes(amenity.id) && (
-                          <Check className="text-white size-4" />
-                        )}
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-gray-900">
+                            Number of Guests
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <button
+                            onClick={() => setGuests(Math.max(1, guests - 1))}
+                            disabled={guests <= 1}
+                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black disabled:opacity-30 transition-all enabled:cursor-pointer disabled:cursor-not-allowed"
+                          >
+                            <Minus className="size-4" />
+                          </button>
+                          <span className="w-4 text-center font-semibold tabular-nums">
+                            {guests}
+                          </span>
+                          <button
+                            onClick={() => setGuests(guests + 1)}
+                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-black transition-all cursor-pointer"
+                          >
+                            <Plus className="size-4" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
-              <div className="p-4 border-t bg-white flex items-center justify-between px-6">
-                <button
-                  onClick={() => setTempSelectedAmenities([])}
-                  className="text-sm font-bold underline cursor-pointer"
-                >
-                  Clear all
-                </button>
+              <div className="relative flex items-center pr-2">
+                {/* Absolute "Clear all" button */}
+                {isFiltered && (
+                  <button
+                    onClick={resetFilters}
+                    className="absolute py-2 -left-20 text-xs font-bold text-gray-500 hover:text-black underline underline-offset-4 transition-colors whitespace-nowrap cursor-pointer"
+                  >
+                    Clear all
+                  </button>
+                )}
+
                 <Button
-                  onClick={handleApplyFilters}
-                  className="bg-black text-white px-8 rounded-xl h-12"
+                  onClick={fetchProperties}
+                  className="bg-emerald-600 hover:bg-emerald-700 rounded-full h-12 px-6 transition-all active:scale-95 cursor-pointer"
                 >
-                  Show results
+                  <Search className="size-5 mr-2" />
+                  <span className="font-bold">Search</span>
                 </Button>
               </div>
-            </DialogContent>
-          </Dialog>
+            </div>
+
+            {/* 2. FILTER BUTTON */}
+            <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  onClick={() => setTempSelectedAmenities(selectedAmenities)}
+                  className="rounded-full h-14 !px-6 border-gray-200 bg-white hover:bg-gray-50 shadow-md flex gap-2 cursor-pointer"
+                >
+                  <SlidersHorizontal className="size-4" />
+                  <span className="font-bold">Filters</span>
+                  {selectedAmenities.length > 0 && (
+                    <span className="bg-black text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
+                      {selectedAmenities.length}
+                    </span>
+                  )}
+                </Button>
+              </DialogTrigger>
+
+              <DialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-white p-0 shadow-lg duration-200 sm:rounded-3xl overflow-hidden">
+                <DialogHeader className="p-6 border-b">
+                  <DialogTitle className="text-xl font-bold text-center">
+                    Filters
+                  </DialogTitle>
+                </DialogHeader>
+
+                <div className="flex-1 overflow-y-auto p-6 max-h-[60vh]">
+                  <h3 className="text-lg font-semibold mb-4">Amenities</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {allAmenities.map((amenity) => (
+                      <div
+                        key={amenity.id}
+                        className="flex items-center justify-between cursor-pointer p-2 hover:bg-gray-50 rounded-lg"
+                        onClick={() => toggleTempAmenity(amenity.id)}
+                      >
+                        <label className="text-sm font-medium cursor-pointer">
+                          {amenity.name}
+                        </label>
+                        <div
+                          className={cn(
+                            "w-6 h-6 rounded-md border flex items-center justify-center transition-colors",
+                            tempSelectedAmenities.includes(amenity.id)
+                              ? "bg-emerald-600 border-emerald-600"
+                              : "border-gray-300",
+                          )}
+                        >
+                          {tempSelectedAmenities.includes(amenity.id) && (
+                            <Check className="text-white size-4" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-4 border-t bg-white flex items-center justify-between px-6">
+                  <button
+                    onClick={() => setTempSelectedAmenities([])}
+                    className="text-sm font-bold underline cursor-pointer"
+                  >
+                    Clear all
+                  </button>
+                  <Button
+                    onClick={handleApplyFilters}
+                    className="bg-black text-white px-8 rounded-xl h-12 cursor-pointer"
+                  >
+                    Show results
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* ROW 2: AI Smart Search Bar */}
+          <div className="flex flex-col items-center w-full max-w-2xl mt-6">
+            <div className="flex items-center gap-4 w-full mb-4 px-4">
+              <div className="h-px bg-gray-200 flex-1"></div>
+              <span className="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">
+                Or describe your stay using AI
+              </span>
+              <div className="h-px bg-gray-200 flex-1"></div>
+            </div>
+
+            <form
+              onSubmit={handleSmartSearch}
+              className="relative flex items-center w-full bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-full shadow-sm p-2 transition-all focus-within:shadow-md focus-within:border-emerald-400"
+            >
+              <Sparkles className="text-emerald-500 size-5 ml-4 mr-3 flex-shrink-0" />
+              <input
+                type="text"
+                placeholder="e.g. 'A cozy cabin with a mountain view for 5 people...'"
+                value={aiQuery}
+                onChange={(e) => setAiQuery(e.target.value)}
+                className="bg-transparent w-full border-none focus:outline-none text-sm text-emerald-900 placeholder:text-emerald-600/60 font-medium"
+                disabled={isAiSearching}
+              />
+              <Button
+                type="submit"
+                disabled={isAiSearching || !aiQuery.trim()}
+                className="ml-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full h-11 px-6 shrink-0 transition-all cursor-pointer"
+              >
+                {isAiSearching ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  "Generate"
+                )}
+              </Button>
+            </form>
+          </div>
         </div>
 
         {/* --- MOBILE SEARCH TRIGGER --- */}
