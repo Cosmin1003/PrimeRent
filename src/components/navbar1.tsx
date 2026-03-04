@@ -71,12 +71,14 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
       <div className="container max-w-7xl mx-auto px-6">
         {/* Desktop Menu */}
         <nav className="hidden items-center justify-between lg:flex">
-          {/* Left: Logo (Now separate) */}
-          <div className="flex-shrink-0">
-            <Link to="/" className="flex items-center gap-1">
-              <span className="text-3xl font-black tracking-tighter text-black">
-                PRIME<span className="text-emerald-600">RENT</span>
-              </span>
+          {/* Left: Logo Image */}
+          <div className="shrink-0">
+            <Link to="/" className="flex items-center">
+              <img 
+                src="/logo.webp" 
+                alt="PrimeRent Logo" 
+                className="h-10 w-auto object-contain" 
+              />
             </Link>
           </div>
 
@@ -159,10 +161,12 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
         {/* Mobile Menu */}
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-1">
-              <span className="text-xl font-black tracking-tighter text-black">
-                PRIME<span className="text-emerald-600">RENT</span>
-              </span>
+            <Link to="/" className="flex items-center">
+              <img 
+                src="/logo.webp" 
+                alt="PrimeRent Logo" 
+                className="h-8 w-auto object-contain" 
+              />
             </Link>
             <Sheet>
               <SheetTrigger>
