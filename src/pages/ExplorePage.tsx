@@ -14,6 +14,8 @@ import {
   Heart,
   Loader2,
   Sparkles,
+  MapIcon,
+  ListIcon,
 } from "lucide-react";
 import { format } from "date-fns";
 import { type DateRange } from "react-day-picker";
@@ -46,6 +48,7 @@ import type { Property } from "../types/property";
 import type { Amenity } from "@/types/amenity";
 import { Link } from "react-router-dom";
 import { useFavorite } from "@/hooks/useFavorite";
+import { PropertiesMap } from "@/components/PropertiesMap";
 
 export default function ExplorePage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -72,6 +75,8 @@ export default function ExplorePage() {
 
   const [aiQuery, setAiQuery] = useState("");
   const [isAiSearching, setIsAiSearching] = useState(false);
+
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -200,7 +205,7 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="bg-white md:bg-gray-50 pt-15 pb-20">
+    <div className="bg-white md:bg-gray-50 pt-15 pb-20 relative min-h-screen">
       <div className="container max-w-7xl mx-auto px-4 md:px-6">
         {/* --- DESKTOP TOP BAR (Search + Filter Separated) --- */}
         <div className="hidden md:flex flex-col items-center justify-center w-full mb-12">
@@ -549,31 +554,54 @@ export default function ExplorePage() {
           </p>
         </div>
 
-        {/* --- PROPERTY GRID --- */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
-          {loading ? (
-            Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="bg-gray-200 aspect-square rounded-2xl mb-4" />
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
+        {/* --- DYNAMIC VIEW: MAP OR GRID --- */}
+        {viewMode === "list" ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+            {loading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-gray-200 aspect-square rounded-2xl mb-4" />
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                </div>
+              ))
+            ) : sortedProperties.length > 0 ? (
+              sortedProperties.map((prop) => (
+                <PropertyCard key={prop.id} property={prop} userId={userId} />
+              ))
+            ) : (
+              <div className="col-span-full py-20 text-center">
+                <p className="text-xl font-semibold text-gray-900">
+                  No properties found
+                </p>
+                <p className="text-gray-500">
+                  Try adjusting your filters or search area.
+                </p>
               </div>
-            ))
-          ) : sortedProperties.length > 0 ? (
-            sortedProperties.map((prop) => (
-              <PropertyCard key={prop.id} property={prop} userId={userId} />
-            ))
+            )}
+          </div>
+        ) : (
+          // RENDER MAP VIEW
+          <PropertiesMap properties={sortedProperties} userId={userId} />
+        )}
+      </div>
+
+      {/* --- FLOATING TOGGLE BUTTON --- */}
+      <div className="fixed bottom-14 left-1/2 -translate-x-1/2 z-40">
+        <Button
+          onClick={() => setViewMode(viewMode === "list" ? "map" : "list")}
+          className="bg-black hover:bg-gray-800 text-white rounded-full px-6 py-6 shadow-xl flex items-center gap-2 font-bold transition-transform hover:scale-105 cursor-pointer"
+        >
+          {viewMode === "list" ? (
+            <>
+              Show map <MapIcon className="size-4" />
+            </>
           ) : (
-            <div className="col-span-full py-20 text-center">
-              <p className="text-xl font-semibold text-gray-900">
-                No properties found
-              </p>
-              <p className="text-gray-500">
-                Try adjusting your filters or search area.
-              </p>
-            </div>
+            <>
+              Show list <ListIcon className="size-4" />
+            </>
           )}
-        </div>
+        </Button>
       </div>
     </div>
   );
