@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabaseClient";
 import {
   Search,
@@ -94,7 +94,7 @@ export default function ExplorePage() {
   }, []);
 
   // --- Data Fetching ---
-  const fetchProperties = async () => {
+  const fetchProperties = useCallback( async () => {
     setLoading(true);
     try {
       // 1. Prepare dates. If the user only picked one date, treat as null
@@ -128,11 +128,11 @@ export default function ExplorePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [location, guests, date, selectedAmenities]);
 
   useEffect(() => {
     fetchProperties();
-  }, [selectedAmenities]);
+  }, [selectedAmenities, fetchProperties]);
 
   const handleApplyFilters = () => {
     setSelectedAmenities(tempSelectedAmenities);
