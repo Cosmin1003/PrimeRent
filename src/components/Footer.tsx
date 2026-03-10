@@ -1,119 +1,222 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Facebook, 
-  Twitter, 
-  Instagram, 
-  Linkedin, 
-  Mail, 
-  Send 
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Mail,
+  Phone,
+  MapPin,
+  Home,
+  Search,
+  Heart,
+  CalendarDays,
+  LayoutDashboard,
+  PlusCircle,
+  List,
+  ClipboardList,
+  ArrowUp,
+  UserPlus,
 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { supabase } from '../supabaseClient';
 
-const Footer: React.FC = () => {
+interface FooterProps {
+  user?: { id: string } | null;
+}
+
+const Footer: React.FC<FooterProps> = ({ user }) => {
   const currentYear = new Date().getFullYear();
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getRole = async () => {
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        if (data) setRole(data.role);
+      } else {
+        setRole(null);
+      }
+    };
+    getRole();
+  }, [user]);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <footer className="bg-slate-950 text-slate-300">
       <div className="container max-w-7xl mx-auto px-4 py-16">
         {/* Top Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
-          
-          {/* Brand & Newsletter */}
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+
+          {/* Brand & Contact */}
+          <div>
             <Link to="/" className="text-2xl font-bold tracking-tighter text-white mb-6 block">
               PRIME<span className="text-emerald-500">RENT</span>
             </Link>
-            <p className="text-slate-400 mb-8 max-w-sm">
-              Discover extraordinary stays and unique experiences around the globe. We make finding your next home-away-from-home simple and secure.
+            <p className="text-slate-400 mb-6 text-sm leading-relaxed">
+              Find and book your perfect stay, or share your property with travelers worldwide. Simple, secure, and seamless.
             </p>
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-white uppercase tracking-wider">Join our newsletter</h4>
-              <div className="flex gap-2 max-w-md">
-                <Input 
-                  type="email" 
-                  placeholder="Enter your email" 
-                  className="bg-slate-900 border-slate-800 text-white focus-visible:ring-emerald-500" 
-                />
-                <Button className="bg-emerald-600 hover:bg-emerald-700">
-                  <Send size={16} />
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-white font-semibold mb-6">Explore</h4>
-            <ul className="space-y-4 text-sm">
-              <li><Link to="/explore" className="hover:text-emerald-500 transition-colors">Browse Properties</Link></li>
-              <li><Link to="/destinations" className="hover:text-emerald-500 transition-colors">Destinations</Link></li>
-              <li><Link to="/trending" className="hover:text-emerald-500 transition-colors">Trending Stays</Link></li>
-              <li><Link to="/travel-guides" className="hover:text-emerald-500 transition-colors">Travel Guides</Link></li>
+            <ul className="space-y-3 text-sm">
+              <li>
+                <a href="mailto:support@primerent.com" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                  <Mail size={14} className="text-emerald-500 shrink-0" />
+                  support@primerent.com
+                </a>
+              </li>
+              <li>
+                <a href="tel:+18001234567" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                  <Phone size={14} className="text-emerald-500 shrink-0" />
+                  +1 (800) 123-4567
+                </a>
+              </li>
+              <li className="flex items-center gap-2 text-slate-400">
+                <MapPin size={14} className="text-emerald-500 shrink-0" />
+                Athens, Greece
+              </li>
             </ul>
           </div>
 
-          {/* Host Links */}
+          {/* Discover */}
+          <div>
+            <h4 className="text-white font-semibold mb-6">Discover</h4>
+            <ul className="space-y-4 text-sm">
+              <li>
+                <Link to="/" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                  <Home size={14} className="shrink-0" /> Home
+                </Link>
+              </li>
+              <li>
+                <Link to="/explore" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                  <Search size={14} className="shrink-0" /> Explore Properties
+                </Link>
+              </li>
+              <li>
+                <Link to="/favorites" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                  <Heart size={14} className="shrink-0" /> My Favorites
+                </Link>
+              </li>
+              <li>
+                <Link to="/bookings" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                  <CalendarDays size={14} className="shrink-0" /> My Bookings
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Hosting */}
           <div>
             <h4 className="text-white font-semibold mb-6">Hosting</h4>
-            <ul className="space-y-4 text-sm">
-              <li><Link to="/host/setup" className="hover:text-emerald-500 transition-colors">Become a Host</Link></li>
-              <li><Link to="/host/guidelines" className="hover:text-emerald-500 transition-colors">Host Guidelines</Link></li>
-              <li><Link to="/host/resources" className="hover:text-emerald-500 transition-colors">Resources</Link></li>
-              <li><Link to="/insurance" className="hover:text-emerald-500 transition-colors">Host Insurance</Link></li>
-            </ul>
+            {role === 'host' ? (
+              <ul className="space-y-4 text-sm">
+                <li>
+                  <Link to="/host/dashboard" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                    <LayoutDashboard size={14} className="shrink-0" /> Host Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/host/create-listing" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                    <PlusCircle size={14} className="shrink-0" /> Create Listing
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/host/manage-listings" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                    <List size={14} className="shrink-0" /> Manage Listings
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/host/reservations" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                    <ClipboardList size={14} className="shrink-0" /> Reservations
+                  </Link>
+                </li>
+              </ul>
+            ) : (
+              <ul className="space-y-4 text-sm">
+                <li>
+                  <Link to="/host/dashboard" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                    <UserPlus size={14} className="shrink-0" /> Become a Host
+                  </Link>
+                </li>
+                <li className="text-slate-500 text-xs leading-relaxed">
+                  List your property and start earning with PrimeRent.
+                </li>
+              </ul>
+            )}
           </div>
 
-          {/* Support Links */}
+          {/* Account & Social */}
           <div>
-            <h4 className="text-white font-semibold mb-6">Support</h4>
-            <ul className="space-y-4 text-sm">
-              <li><Link to="/help" className="hover:text-emerald-500 transition-colors">Help Center</Link></li>
-              <li><Link to="/contact" className="hover:text-emerald-500 transition-colors">Contact Us</Link></li>
-              <li><Link to="/safety" className="hover:text-emerald-500 transition-colors">Safety Information</Link></li>
-              <li><Link to="/faqs" className="hover:text-emerald-500 transition-colors">FAQs</Link></li>
+            <h4 className="text-white font-semibold mb-6">Account</h4>
+            <ul className="space-y-4 text-sm mb-8">
+              <li>
+                <Link to="/profile" className="hover:text-emerald-500 transition-colors">My Profile</Link>
+              </li>
+              <li>
+                <Link to="/auth" className="hover:text-emerald-500 transition-colors">Log In / Sign Up</Link>
+              </li>
             </ul>
+
+            <h4 className="text-white font-semibold mb-4">Follow Us</h4>
+            <div className="flex gap-3">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="p-2 rounded-full bg-slate-900 hover:bg-emerald-600 hover:text-white transition-all"
+              >
+                <Facebook size={18} />
+              </a>
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Twitter"
+                className="p-2 rounded-full bg-slate-900 hover:bg-emerald-600 hover:text-white transition-all"
+              >
+                <Twitter size={18} />
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="p-2 rounded-full bg-slate-900 hover:bg-emerald-600 hover:text-white transition-all"
+              >
+                <Instagram size={18} />
+              </a>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="p-2 rounded-full bg-slate-900 hover:bg-emerald-600 hover:text-white transition-all"
+              >
+                <Linkedin size={18} />
+              </a>
+            </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col items-center md:items-start gap-2">
-            <p className="text-sm">
-              © {currentYear} PrimeRent Inc. All rights reserved.
-            </p>
-            <div className="flex gap-4 text-xs text-slate-500">
-              <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-              <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-              <Link to="/cookies" className="hover:text-white transition-colors">Cookie Settings</Link>
-            </div>
-          </div>
+        <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-slate-500">
+            © {currentYear} PrimeRent Inc. All rights reserved.
+          </p>
 
-          {/* Socials & Payments */}
-          <div className="flex flex-col items-center md:items-end gap-6">
-            <div className="flex gap-4">
-              <a href="#" className="p-2 rounded-full bg-slate-900 hover:bg-emerald-600 hover:text-white transition-all">
-                <Facebook size={18} />
-              </a>
-              <a href="#" className="p-2 rounded-full bg-slate-900 hover:bg-emerald-600 hover:text-white transition-all">
-                <Twitter size={18} />
-              </a>
-              <a href="#" className="p-2 rounded-full bg-slate-900 hover:bg-emerald-600 hover:text-white transition-all">
-                <Instagram size={18} />
-              </a>
-              <a href="#" className="p-2 rounded-full bg-slate-900 hover:bg-emerald-600 hover:text-white transition-all">
-                <Linkedin size={18} />
-              </a>
-            </div>
-            {/* Payment Icons Placeholder */}
-            <div className="flex gap-3 grayscale opacity-50">
-              <div className="w-10 h-6 bg-slate-800 rounded border border-slate-700 flex items-center justify-center text-[8px] font-bold">VISA</div>
-              <div className="w-10 h-6 bg-slate-800 rounded border border-slate-700 flex items-center justify-center text-[8px] font-bold">MC</div>
-              <div className="w-10 h-6 bg-slate-800 rounded border border-slate-700 flex items-center justify-center text-[8px] font-bold">AMEX</div>
-              <div className="w-10 h-6 bg-slate-800 rounded border border-slate-700 flex items-center justify-center text-[8px] font-bold">PAYPAL</div>
-            </div>
-          </div>
+          <button
+            onClick={scrollToTop}
+            aria-label="Back to top"
+            className="p-2 rounded-full bg-slate-900 hover:bg-emerald-600 hover:text-white transition-all"
+          >
+            <ArrowUp size={18} />
+          </button>
         </div>
       </div>
     </footer>

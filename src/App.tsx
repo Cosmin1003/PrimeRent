@@ -58,7 +58,7 @@ function App() {
           <Route path="/admin/embeddings" element={<AdminEmbeddingsPage />} />
         </Routes>
       </main>
-      <Footer />
+      <Footer user={session?.user} />
     </Router>
   );
 }
