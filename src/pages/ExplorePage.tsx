@@ -46,11 +46,12 @@ import {
 
 import type { Property } from "../types/property";
 import type { Amenity } from "@/types/amenity";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useFavorite } from "@/hooks/useFavorite";
 import { PropertiesMap } from "@/components/PropertiesMap";
 
 export default function ExplorePage() {
+  const [searchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -64,7 +65,7 @@ export default function ExplorePage() {
   const [sortBy, setSortBy] = useState<string>("default");
 
   // --- Search States ---
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState(searchParams.get("city") || "");
   const [guests, setGuests] = useState(1);
   const [date, setDate] = useState<DateRange | undefined>({
     from: undefined,
