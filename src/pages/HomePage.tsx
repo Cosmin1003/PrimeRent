@@ -59,12 +59,21 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState<Stats>({ properties: 0, guests: 0, bookings: 0, cities: 0 });
   const [popularCities, setPopularCities] = useState<{ city: string; count: number; image: string }[]>([]);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     fetchFeaturedProperties();
     fetchStats();
     fetchPopularCities();
-  }, []);
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+        .then(({ data }) => { if (data) setRole(data.role); });
+    }
+  }, [user]);
 
   const fetchFeaturedProperties = async () => {
     try {
@@ -333,22 +342,30 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
             <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-emerald-600/20 rounded-full blur-3xl"></div>
             <div className="relative z-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                {user ? 'List your space and start earning' : 'Ready to start your journey?'}
+                {user
+                  ? role === 'host' ? 'List your space and start earning' : 'Become a host and start earning'
+                  : 'Ready to start your journey?'}
               </h2>
               <p className="text-slate-400 max-w-xl mx-auto mb-10">
                 Join our community of hosts and travelers. Whether you're looking to book or host, PrimeRent makes it simple.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 {user ? (
-                  <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-10">
-                    <Link to="/host/create-listing">Create a Listing</Link>
-                  </Button>
+                  role === 'host' ? (
+                    <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-10">
+                      <Link to="/host/create-listing">Create a Listing</Link>
+                    </Button>
+                  ) : (
+                    <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-10">
+                      <Link to="/host/dashboard">Become a Host</Link>
+                    </Button>
+                  )
                 ) : (
                   <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-10">
                     <Link to="/auth">Join PrimeRent Now</Link>
                   </Button>
                 )}
-                <Button asChild variant="outline" size="lg" className="px-10 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                <Button asChild variant="outline" size="lg" className="px-10 border-slate-700 text-slate-800 hover:bg-slate-800 hover:text-white">
                   <Link to="/explore">Explore Properties</Link>
                 </Button>
               </div>
