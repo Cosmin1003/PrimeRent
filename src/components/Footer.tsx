@@ -73,12 +73,12 @@ const Footer: React.FC<FooterProps> = ({ user }) => {
               <li>
                 <a href="tel:+18001234567" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
                   <Phone size={14} className="text-emerald-500 shrink-0" />
-                  +1 (800) 123-4567
+                  0766 799 799
                 </a>
               </li>
               <li className="flex items-center gap-2 text-slate-400">
                 <MapPin size={14} className="text-emerald-500 shrink-0" />
-                Athens, Greece
+                Brasov, Romania
               </li>
             </ul>
           </div>
