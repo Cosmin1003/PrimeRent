@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { Heart } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
 import { PropertyCard } from "./ExplorePage";
 import type { Property } from "../types/property";
 
 export default function FavoritesPage() {
+  const { t } = useTranslation();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | undefined>();
@@ -70,10 +72,10 @@ export default function FavoritesPage() {
         <header className="mb-10">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <Heart className="fill-red-500 text-red-500 size-8" />
-            Your Favorites
+            {t('favorites.title')}
           </h1>
           <p className="text-gray-500 mt-2">
-            The properties you've saved for your next trip.
+            {t('favorites.subtitle')}
           </p>
         </header>
 
@@ -97,16 +99,16 @@ export default function FavoritesPage() {
           <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
             <Heart className="size-12 text-gray-300 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-900">
-              No favorites yet
+              {t('favorites.noFavorites')}
             </h2>
             <p className="text-gray-500 mb-6">
-              Start exploring to save properties you love.
+              {t('favorites.noFavoritesHint')}
             </p>
             <Button
               asChild
               className="bg-emerald-600 hover:bg-emerald-700 rounded-full px-8"
             >
-              <Link to="/explore">Go Exploring</Link>
+              <Link to="/explore">{t('favorites.goExploring')}</Link>
             </Button>
           </div>
         )}

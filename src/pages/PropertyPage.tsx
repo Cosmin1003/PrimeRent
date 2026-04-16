@@ -2,6 +2,7 @@
 
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { supabase } from "../supabaseClient";
 import { Star, Share, Heart, ChevronLeft, Minus, Plus, Sparkles } from "lucide-react";
 
@@ -37,6 +38,7 @@ import { lazy, Suspense } from "react";
 const PropertyMap = lazy(() => import("@/components/PropertyMap"));
 
 export default function PropertyPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -184,7 +186,7 @@ export default function PropertyPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-pulse text-gray-400 font-medium">
-          Loading luxury stays...
+          {t('property.loading')}
         </div>
       </div>
     );
@@ -193,9 +195,9 @@ export default function PropertyPage() {
   if (!property) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <h2 className="text-xl font-bold">Property not found</h2>
+        <h2 className="text-xl font-bold">{t('property.notFound')}</h2>
         <ShadButton onClick={() => navigate("/explore")} variant="link">
-          Go back to explore
+          {t('property.goBackExplore')}
         </ShadButton>
       </div>
     );
@@ -226,7 +228,7 @@ export default function PropertyPage() {
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        alert("Link copied to clipboard!");
+        alert(t('property.linkCopied'));
       }
     } catch (err) {
       console.error("Error sharing:", err);
@@ -251,8 +253,7 @@ export default function PropertyPage() {
 
   const handleReserve = async () => {
     if (!date?.from || !date?.to || !userId) {
-      alert("Please log in and select dates");
-      return;
+        alert(t('bookings.loading'));
     }
 
     setLoading(true);
@@ -265,7 +266,7 @@ export default function PropertyPage() {
       const token = session?.access_token;
 
       if (!token) {
-        alert("Please sign in to book.");
+        alert(t('bookings.loading'));
         setLoading(false);
         return;
       }
@@ -372,7 +373,7 @@ export default function PropertyPage() {
                 className="font-bold text-sm"
                 onClick={handleShare}
               >
-                <Share className="size-4 mr-1" /> Share
+                <Share className="size-4 mr-1" /> {t('property.share')}
               </ShadButton>
               <ShadButton
                 variant="ghost"
@@ -385,7 +386,7 @@ export default function PropertyPage() {
                     isFavorited ? "fill-red-500 text-red-500" : "text-gray-600",
                   )}
                 />
-                {isFavorited ? "Saved" : "Save"}
+                {isFavorited ? t('property.saved') : t('property.save')}
               </ShadButton>
             </div>
           </div>
@@ -447,7 +448,7 @@ export default function PropertyPage() {
               variant="outline"
               className="absolute bottom-6 right-6 bg-white border-black text-xs font-bold shadow-md hover:bg-gray-200"
             >
-              Show all photos
+              {t('property.showAllPhotos')}
             </ShadButton>
           )}
         </div>
@@ -460,16 +461,13 @@ export default function PropertyPage() {
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-bold">
-                  Hosted by {property.host_full_name || "a local host"}
+                  {t('property.hostedBy', { name: property.host_full_name || 'a local host' })}
                 </h2>
                 <p className="text-gray-600">
-                  {property.max_guests}{" "}
-                  {property.max_guests === 1 ? "guest" : "guests"} •{" "}
-                  {property.bedrooms}{" "}
-                  {property.bedrooms === 1 ? "bedroom" : "bedrooms"} •{" "}
-                  {property.beds} {property.beds === 1 ? "bed" : "beds"} •{" "}
-                  {property.bathrooms}{" "}
-                  {property.bathrooms === 1 ? "bath" : "baths"}
+                  {property.max_guests === 1 ? t('property.guest', { count: property.max_guests }) : t('property.guests', { count: property.max_guests })}{" • "}
+                  {property.bedrooms === 1 ? t('property.bedroom', { count: property.bedrooms }) : t('property.bedrooms', { count: property.bedrooms })}{" • "}
+                  {property.beds === 1 ? t('property.bed', { count: property.beds }) : t('property.beds', { count: property.beds })}{" • "}
+                  {property.bathrooms === 1 ? t('property.bath', { count: property.bathrooms }) : t('property.baths', { count: property.bathrooms })}
                 </p>
               </div>
               <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center overflow-hidden border">
@@ -484,7 +482,7 @@ export default function PropertyPage() {
 
             {/* 2. Description (Now moved directly under Info) */}
             <div>
-              <h3 className="text-xl font-bold mb-4">About this space</h3>
+              <h3 className="text-xl font-bold mb-4">{t('property.aboutSpace')}</h3>
               <p className="text-gray-700 leading-relaxed">
                 {property.description ||
                   "Experience the perfect blend of comfort and style in this beautiful home. Located in a prime area, you'll be minutes away from the best local attractions while enjoying a quiet, private retreat."}
@@ -495,7 +493,7 @@ export default function PropertyPage() {
 
             {/* 3. High-Detail Amenities List */}
             <div className="mt-8">
-              <h3 className="text-xl font-bold mb-6">What this place offers</h3>
+              <h3 className="text-xl font-bold mb-6">{t('property.whatOffers')}</h3>
 
               {/* 2-Column Grid for first 6 items */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-12">
@@ -524,7 +522,7 @@ export default function PropertyPage() {
                       variant="outline"
                       className="mt-5 border-black font-bold px-6 h-12 rounded-xl hover:bg-gray-50"
                     >
-                      Show all {amenities.length} amenities
+                    {t('property.showAllAmenities', { count: amenities.length })}
                     </ShadButton>
                   </DialogTrigger>
 
@@ -533,7 +531,7 @@ export default function PropertyPage() {
                     {/* 1. Sticky Header - stays at the top while you scroll the list */}
                     <DialogHeader className="p-8 pb-6 border-b flex-shrink-0 bg-white">
                       <DialogTitle className="text-2xl font-bold text-gray-900">
-                        What this place offers
+                        {t('property.whatOffers')}
                       </DialogTitle>
                     </DialogHeader>
 
@@ -575,7 +573,7 @@ export default function PropertyPage() {
                   <span className="text-2xl font-bold">
                     ${property.price_per_night}
                   </span>
-                  <span className="text-gray-600 font-normal"> night</span>
+                  <span className="text-gray-600 font-normal"> {t('property.night')}</span>
                 </div>
                 <div className="flex items-center gap-1 text-sm font-bold">
                   <Star className="size-3 fill-black" />
@@ -594,7 +592,7 @@ export default function PropertyPage() {
                     <div className="grid grid-cols-2 border-b border-gray-400 divide-x divide-gray-400 cursor-pointer hover:bg-gray-50 transition-colors">
                       <div className="p-3">
                         <label className="block text-[10px] font-extrabold uppercase text-gray-500">
-                          Check-in
+                          {t('property.checkIn')}
                         </label>
                         <span
                           className={cn(
@@ -604,12 +602,12 @@ export default function PropertyPage() {
                         >
                           {date?.from
                             ? format(date.from, "MM/dd/yyyy")
-                            : "Add date"}
+                            : t('property.addDate')}
                         </span>
                       </div>
                       <div className="p-3">
                         <label className="block text-[10px] font-extrabold uppercase text-gray-500">
-                          Checkout
+                          {t('property.checkOut')}
                         </label>
                         <span
                           className={cn(
@@ -619,7 +617,7 @@ export default function PropertyPage() {
                         >
                           {date?.to
                             ? format(date.to, "MM/dd/yyyy")
-                            : "Add date"}
+                            : t('property.addDate')}
                         </span>
                       </div>
                     </div>
@@ -629,7 +627,7 @@ export default function PropertyPage() {
                     align="end"
                   >
                     <div className="p-4 border-b flex justify-between items-center">
-                      <span className="text-sm font-bold">Select Dates</span>
+                      <span className="text-sm font-bold">{t('property.selectDates')}</span>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -638,7 +636,7 @@ export default function PropertyPage() {
                         }
                         className="text-xs underline"
                       >
-                        Clear dates
+                        {t('property.clearDates')}
                       </Button>
                     </div>
                     <Calendar
@@ -673,9 +671,9 @@ export default function PropertyPage() {
                 <div className="p-3 flex justify-between items-center">
                   <div>
                     <label className="block text-[10px] font-extrabold uppercase">
-                      Guests
+                      {t('property.guests_label')}
                     </label>
-                    <span className="text-sm">{guestCount} guest</span>
+                    <span className="text-sm">{t('property.guestCount', { count: guestCount })}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <button
@@ -702,12 +700,12 @@ export default function PropertyPage() {
                   disabled={nights === 0 || !isRangeAvailable(date)}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 text-lg rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Reserve
+                  {t('property.reserve')}
                 </ShadButton>
 
                 {nights > 0 && !isRangeAvailable(date) && (
                   <p className="text-destructive text-xs text-center font-medium animate-in fade-in slide-in-from-top-1">
-                    Some dates in this range are already booked.
+                    {t('property.datesUnavailable')}
                   </p>
                 )}
               </div>
@@ -717,25 +715,26 @@ export default function PropertyPage() {
                   <>
                     <div className="flex justify-between text-gray-600">
                       <span>
-                        ${property.price_per_night} x {nights}{" "}
-                        {nights === 1 ? "night" : "nights"}
+                        {nights === 1
+                          ? t('property.nightsBreakdown', { price: property.price_per_night, count: nights })
+                          : t('property.nightsBreakdownPlural', { price: property.price_per_night, count: nights })}
                       </span>
                       <span>${basePrice}</span>
                     </div>
                     <div className="flex justify-between text-gray-600">
-                      <span>Cleaning fee</span>
+                      <span>{t('property.cleaningFee')}</span>
                       <span>${cleaningFee}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-bold text-lg pt-2">
-                      <span>Total before taxes</span>
+                      <span>{t('property.totalBeforeTaxes')}</span>
                       <span>${totalPrice}</span>
                     </div>
                   </>
                 ) : (
                   <div className="mt-6 text-center">
                     <p className="text-sm text-gray-500">
-                      Select dates to see total price
+                      {t('property.selectDatesToSeePrice')}
                     </p>
                   </div>
                 )}
@@ -762,7 +761,7 @@ export default function PropertyPage() {
               </span>
               <span className="text-emerald-600">•</span>
               <span>
-                {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+                {reviews.length === 1 ? t('property.review', { count: reviews.length }) : t('property.reviews', { count: reviews.length })}
               </span>
             </div>
 
@@ -775,7 +774,7 @@ export default function PropertyPage() {
                 className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 transition-colors w-full sm:w-auto cursor-pointer"
               >
                 <Sparkles size={16} className="mr-2" />
-                {isSummarizing ? "Analyzing reviews..." : "Summarize with AI"}
+                {isSummarizing ? t('property.analyzingReviews') : t('property.summarizeWithAi')}
               </ShadButton>
             )}
           </div>
@@ -785,7 +784,7 @@ export default function PropertyPage() {
             <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-6 mb-10 animate-in fade-in slide-in-from-bottom-4">
               <div className="flex items-center gap-2 text-emerald-800 font-bold mb-3">
                 <Sparkles className="size-5" />
-                <h3>AI Review Summary</h3>
+                <h3>{t('property.aiSummaryTitle')}</h3>
               </div>
               <p className="text-gray-700 leading-relaxed mb-6">
                 {aiSummary.summary}
@@ -795,7 +794,7 @@ export default function PropertyPage() {
                 {/* Pros */}
                 {aiSummary.pros && aiSummary.pros.length > 0 && (
                   <div>
-                    <h4 className="font-bold text-gray-900 mb-2 text-sm uppercase">Guests loved</h4>
+                    <h4 className="font-bold text-gray-900 mb-2 text-sm uppercase">{t('property.guestsLoved')}</h4>
                     <ul className="space-y-2">
                       {aiSummary.pros.map((pro, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-gray-700 text-sm">
@@ -810,7 +809,7 @@ export default function PropertyPage() {
                 {/* Cons */}
                 {aiSummary.cons && aiSummary.cons.length > 0 && (
                   <div>
-                    <h4 className="font-bold text-gray-900 mb-2 text-sm uppercase">Some mentioned</h4>
+                    <h4 className="font-bold text-gray-900 mb-2 text-sm uppercase">{t('property.someMentioned')}</h4>
                     <ul className="space-y-2">
                       {aiSummary.cons.map((con, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-gray-700 text-sm">
@@ -868,7 +867,7 @@ export default function PropertyPage() {
               ))
             ) : (
               <p className="text-gray-500 italic">
-                No reviews yet for this property.
+                {t('property.noReviews')}
               </p>
             )}
           </div>
@@ -881,7 +880,7 @@ export default function PropertyPage() {
                   variant="outline"
                   className="mt-5 border-black font-bold px-6 h-12 rounded-xl hover:bg-gray-50"
                 >
-                  Show all {reviews.length} reviews
+                  {t('property.showAllReviews', { count: reviews.length })}
                 </ShadButton>
               </DialogTrigger>
 
@@ -1006,7 +1005,7 @@ export default function PropertyPage() {
         {/* Ensure this wrapper exists */}
         <Separator className="my-12" />
         <section className="mb-12">
-          <h3 className="text-xl font-bold mb-6">Where you'll be</h3>
+          <h3 className="text-xl font-bold mb-6">{t('property.whereYoullBe')}</h3>
           <p className="text-gray-600 mb-6">
             {property.city}, {property.address}
           </p>

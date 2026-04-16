@@ -3,8 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { PlusCircle, ClipboardList, LayoutDashboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 
 export default function HostDashboardPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -15,7 +17,7 @@ export default function HostDashboardPage() {
             <LayoutDashboard className="text-white size-6" />
           </div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-            Host Hub
+            {t('dashboard.title')}
           </h1>
         </div>
 
@@ -26,16 +28,16 @@ export default function HostDashboardPage() {
               <ClipboardList className="text-emerald-600 size-7 group-hover:text-white transition-colors" />
             </div>
             <h2 className="text-2xl font-bold mb-2 text-slate-900">
-              Reservation Requests
+              {t('dashboard.reservationsTitle')}
             </h2>
             <p className="text-slate-500 mb-8">
-              Review, confirm, or decline pending booking requests from guests.
+              {t('dashboard.reservationsDesc')}
             </p>
             <Button
               onClick={() => navigate("/host/reservations")}
               className="w-full bg-black hover:bg-emerald-600 h-12 rounded-xl font-bold transition-colors mt-auto"
             >
-              View Requests
+              {t('dashboard.viewRequests')}
             </Button>
           </div>
 
@@ -45,17 +47,16 @@ export default function HostDashboardPage() {
               <PlusCircle className="text-emerald-600 size-7 group-hover:text-white transition-colors" />
             </div>
             <h2 className="text-2xl font-bold mb-2 text-slate-900">
-              List New Property
+              {t('dashboard.createListingTitle')}
             </h2>
             <p className="text-slate-500 mb-8">
-              Add a new stay to your portfolio and start reaching more
-              travelers.
+              {t('dashboard.createListingDesc')}
             </p>
             <Button
               onClick={() => navigate("/host/create-listing")}
               className="w-full bg-black hover:bg-emerald-600 h-12 rounded-xl font-bold transition-colors mt-auto"
             >
-              Add Property
+              {t('dashboard.addProperty')}
             </Button>
           </div>
 
@@ -65,18 +66,16 @@ export default function HostDashboardPage() {
               <LayoutDashboard className="text-emerald-600 size-7 group-hover:text-white transition-colors" />
             </div>
             <h2 className="text-2xl font-bold mb-2 text-slate-900">
-              Property Inventory
+              {t('dashboard.manageTitle')}
             </h2>
             <p className="text-slate-500 mb-8">
-              Full control over your listed stays. View live pages, update
-              property details, or permanently remove listings from the
-              platform.
+              {t('dashboard.manageDesc')}
             </p>
             <Button
               onClick={() => navigate("/host/manage-listings")}
               className="w-full bg-black hover:bg-emerald-600 h-12 rounded-xl font-bold transition-colors mt-auto"
             >
-              Manage My Properties
+              {t('dashboard.manageProperties')}
             </Button>
           </div>
         </div>

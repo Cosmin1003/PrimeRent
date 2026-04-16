@@ -47,10 +47,12 @@ import {
 import type { Property } from "../types/property";
 import type { Amenity } from "@/types/amenity";
 import { Link, useSearchParams } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { useFavorite } from "@/hooks/useFavorite";
 import { PropertiesMap } from "@/components/PropertiesMap";
 
 export default function ExplorePage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -220,7 +222,7 @@ export default function ExplorePage() {
                   className="hidden md:flex rounded-full h-14 px-6! border-gray-200 bg-white hover:bg-gray-50 shadow-md gap-2 cursor-pointer"
                 >
                   <ArrowUpDown className="size-4" />
-                  <span className="font-bold">Sort</span>
+                  <span className="font-bold">{t('explore.sort')}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -228,10 +230,10 @@ export default function ExplorePage() {
                 className="rounded-2xl w-56 p-2"
               >
                 {[
-                  { id: "default", label: "Default" },
-                  { id: "rating-desc", label: "Top Rated" },
-                  { id: "price-asc", label: "Price: Low to High" },
-                  { id: "price-desc", label: "Price: High to Low" },
+                  { id: "default", label: t('explore.sortDefault') },
+                  { id: "rating-desc", label: t('explore.sortTopRated') },
+                  { id: "price-asc", label: t('explore.sortPriceLow') },
+                  { id: "price-desc", label: t('explore.sortPriceHigh') },
                 ].map((item) => (
                   <DropdownMenuItem
                     key={item.id}
@@ -259,11 +261,11 @@ export default function ExplorePage() {
                 <MapPin className="text-emerald-600 size-5" />
                 <div className="flex flex-col w-full relative">
                   <span className="text-[10px] font-extrabold uppercase text-gray-500">
-                    Where
+                    {t('explore.where')}
                   </span>
                   <div className="flex items-center group">
                     <input
-                      placeholder="Search destinations"
+                      placeholder={t('explore.searchDestinations')}
                       className="bg-transparent border-none focus:outline-none text-sm font-semibold placeholder:text-gray-400 w-full"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
@@ -288,7 +290,7 @@ export default function ExplorePage() {
                       <CalendarIcon className="text-emerald-600 size-5" />
                       <div className="flex flex-col overflow-hidden">
                         <span className="text-[10px] font-extrabold uppercase text-gray-500">
-                          When
+                          {t('explore.when')}
                         </span>
                         <span
                           className={cn(
@@ -300,7 +302,7 @@ export default function ExplorePage() {
                             ? date.to
                               ? `${format(date.from, "MMM dd")} - ${format(date.to, "MMM dd")}`
                               : format(date.from, "MMM dd")
-                            : "Add dates"}
+                            : t('explore.addDates')}
                         </span>
                       </div>
                     </button>
@@ -310,7 +312,7 @@ export default function ExplorePage() {
                     align="center"
                   >
                     <div className="p-4 border-b flex justify-between items-center">
-                      <span className="text-sm font-bold">Select Dates</span>
+                      <span className="text-sm font-bold">{t('explore.selectDates')}</span>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -319,7 +321,7 @@ export default function ExplorePage() {
                         }
                         className="text-xs underline cursor-pointer"
                       >
-                        Clear dates
+                        {t('explore.clearDates')}
                       </Button>
                     </div>
                     <Calendar
@@ -352,12 +354,12 @@ export default function ExplorePage() {
                 <Users className="text-emerald-600 size-5" />
                 <div className="flex flex-col w-full">
                   <span className="text-[10px] font-extrabold uppercase text-gray-500">
-                    Who
+                    {t('explore.who')}
                   </span>
                   <Popover>
                     <PopoverTrigger asChild>
                       <button className="text-sm font-semibold text-left hover:text-emerald-600 transition-colors cursor-pointer">
-                        {guests === 1 ? "1 guest" : `${guests} guests`}
+                        {guests === 1 ? t('explore.guest', { count: 1 }) : t('explore.guests', { count: guests })}
                       </button>
                     </PopoverTrigger>
                     <PopoverContent
@@ -367,7 +369,7 @@ export default function ExplorePage() {
                       <div className="flex items-center justify-between">
                         <div className="flex flex-col">
                           <span className="font-bold text-gray-900">
-                            Number of Guests
+                            {t('explore.numberOfGuests')}
                           </span>
                         </div>
                         <div className="flex items-center gap-4">
@@ -401,7 +403,7 @@ export default function ExplorePage() {
                     onClick={resetFilters}
                     className="absolute py-2 -left-20 text-xs font-bold text-gray-500 hover:text-black underline underline-offset-4 transition-colors whitespace-nowrap cursor-pointer"
                   >
-                    Clear all
+                    {t('explore.clearAll')}
                   </button>
                 )}
 
@@ -410,7 +412,7 @@ export default function ExplorePage() {
                   className="bg-emerald-600 hover:bg-emerald-700 rounded-full h-12 px-6 transition-all active:scale-95 cursor-pointer"
                 >
                   <Search className="size-5 mr-2" />
-                  <span className="font-bold">Search</span>
+                  <span className="font-bold">{t('explore.search')}</span>
                 </Button>
               </div>
             </div>
@@ -424,7 +426,7 @@ export default function ExplorePage() {
                   className="rounded-full h-14 !px-6 border-gray-200 bg-white hover:bg-gray-50 shadow-md flex gap-2 cursor-pointer"
                 >
                   <SlidersHorizontal className="size-4" />
-                  <span className="font-bold">Filters</span>
+                  <span className="font-bold">{t('explore.filters')}</span>
                   {selectedAmenities.length > 0 && (
                     <span className="bg-black text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
                       {selectedAmenities.length}
@@ -436,12 +438,12 @@ export default function ExplorePage() {
               <DialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-white p-0 shadow-lg duration-200 sm:rounded-3xl overflow-hidden">
                 <DialogHeader className="p-6 border-b">
                   <DialogTitle className="text-xl font-bold text-center">
-                    Filters
+                    {t('explore.filters')}
                   </DialogTitle>
                 </DialogHeader>
 
                 <div className="flex-1 overflow-y-auto p-6 max-h-[60vh]">
-                  <h3 className="text-lg font-semibold mb-4">Amenities</h3>
+                  <h3 className="text-lg font-semibold mb-4">{t('explore.amenities')}</h3>
                   <div className="grid grid-cols-2 gap-4">
                     {allAmenities.map((amenity) => (
                       <div
@@ -474,13 +476,13 @@ export default function ExplorePage() {
                     onClick={() => setTempSelectedAmenities([])}
                     className="text-sm font-bold underline cursor-pointer"
                   >
-                    Clear all
+                    {t('explore.clearAll')}
                   </button>
                   <Button
                     onClick={handleApplyFilters}
                     className="bg-black text-white px-8 rounded-xl h-12 cursor-pointer"
                   >
-                    Show results
+                    {t('explore.showResults')}
                   </Button>
                 </div>
               </DialogContent>
@@ -492,7 +494,7 @@ export default function ExplorePage() {
             <div className="flex items-center gap-4 w-full mb-4 px-4">
               <div className="h-px bg-gray-200 flex-1"></div>
               <span className="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">
-                Or describe your stay using AI
+                {t('explore.aiDescription')}
               </span>
               <div className="h-px bg-gray-200 flex-1"></div>
             </div>
@@ -504,7 +506,7 @@ export default function ExplorePage() {
               <Sparkles className="text-emerald-500 size-5 ml-4 mr-3 flex-shrink-0" />
               <input
                 type="text"
-                placeholder="e.g. 'A cozy cabin with a mountain view for 5 people...'"
+                placeholder={t('explore.aiPlaceholder')}
                 value={aiQuery}
                 onChange={(e) => setAiQuery(e.target.value)}
                 className="bg-transparent w-full border-none focus:outline-none text-sm text-emerald-900 placeholder:text-emerald-600/60 font-medium"
@@ -518,7 +520,7 @@ export default function ExplorePage() {
                 {isAiSearching ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : (
-                  "Generate"
+                  t('explore.generate')
                 )}
               </Button>
             </form>
@@ -530,9 +532,9 @@ export default function ExplorePage() {
           <Button className="w-full bg-white border border-gray-200 text-black shadow-md rounded-full py-6 flex justify-start px-6 gap-4 hover:bg-white">
             <Search className="text-emerald-600" />
             <div className="flex flex-col items-start">
-              <span className="text-sm font-bold">Where to?</span>
+              <span className="text-sm font-bold">{t('explore.whereTo')}</span>
               <span className="text-[11px] text-gray-500">
-                Anywhere • Any week • Add guests
+                {t('explore.mobileSubtitle')}
               </span>
             </div>
           </Button>
@@ -540,15 +542,15 @@ export default function ExplorePage() {
 
         <div className="mb-6">
           <p className="text-sm text-gray-500">
-            Showing{" "}
+            {t('explore.showingProperties')}{" "}
             <span className="text-emerald-600 font-bold">
               {sortedProperties.length}
             </span>{" "}
-            properties
+            {t('explore.properties')}
             {location && (
               <>
                 {" "}
-                in{" "}
+                {t('explore.in')}{" "}
                 <span className="text-emerald-600 font-bold">{location}</span>
               </>
             )}
@@ -573,10 +575,10 @@ export default function ExplorePage() {
             ) : (
               <div className="col-span-full py-20 text-center">
                 <p className="text-xl font-semibold text-gray-900">
-                  No properties found
+                  {t('explore.noPropertiesFound')}
                 </p>
                 <p className="text-gray-500">
-                  Try adjusting your filters or search area.
+                  {t('explore.noPropertiesHint')}
                 </p>
               </div>
             )}
@@ -595,11 +597,11 @@ export default function ExplorePage() {
         >
           {viewMode === "list" ? (
             <>
-              Show map <MapIcon className="size-4" />
+              {t('explore.showMap')} <MapIcon className="size-4" />
             </>
           ) : (
             <>
-              Show list <ListIcon className="size-4" />
+              {t('explore.showList')} <ListIcon className="size-4" />
             </>
           )}
         </Button>
@@ -616,6 +618,7 @@ export function PropertyCard({
   property: Property;
   userId?: string;
 }) {
+  const { t } = useTranslation();
   const { isFavorited, toggleFavorite } = useFavorite(property.id, userId);
   return (
     <Link
@@ -651,7 +654,7 @@ export function PropertyCard({
           <div className="flex items-center gap-1 text-sm font-medium">
             <Star className="size-3 fill-black" />
             <span>
-              {property.avg_rating > 0 ? property.avg_rating.toFixed(2) : "New"}
+              {property.avg_rating > 0 ? property.avg_rating.toFixed(2) : t('explore.new')}
             </span>
           </div>
         </div>
@@ -660,12 +663,12 @@ export function PropertyCard({
           {property.title}
         </p>
         <p className="text-gray-400 text-[14px]">
-          Hosted by {property.host_full_name || "Host"}
+          {t('explore.hostedBy', { name: property.host_full_name || 'Host' })}
         </p>
 
         <p className="mt-2 text-[15px] text-emerald-600">
           <span className="font-bold">${property.price_per_night}</span>
-          <span className="text-gray-600 font-normal"> night</span>
+          <span className="text-gray-600 font-normal"> {t('explore.night')}</span>
         </p>
       </div>
     </Link>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/supabaseClient';
 import {
   Heart,
@@ -57,6 +58,7 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ user }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [properties, setProperties] = useState<FeaturedProperty[]>([]);
   const [loading, setLoading] = useState(true);
@@ -182,22 +184,22 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              {stats.properties > 0 ? `${stats.properties} properties available now` : 'New properties available'}
+              {stats.properties > 0 ? t('home.propertiesAvailable', { count: stats.properties }) : t('home.newProperties')}
             </Badge>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 mb-5 leading-[1.08]">
-              Find your next
+              {t('home.heroTitle1')}
               <br />
               <span className="bg-linear-to-r from-emerald-600 via-teal-500 to-emerald-600 bg-clip-text text-transparent">
-                extraordinary
+                {t('home.heroTitle2')}
               </span>{' '}
-              stay
+              {t('home.heroTitle3')}
             </h1>
 
             <p className="max-w-2xl text-base md:text-lg text-slate-500 mb-8 leading-relaxed">
               {user
-                ? 'Welcome back! Discover new destinations and book your next unforgettable experience.'
-                : 'Discover unique homes, luxury villas, and cozy retreats handpicked for unforgettable moments.'}
+                ? t('home.heroSubtitleLoggedIn')
+                : t('home.heroSubtitleGuest')}
             </p>
 
             {/* Search Bar */}
@@ -206,24 +208,24 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
                 <MapPin size={18} className="text-emerald-500 shrink-0" />
                 <input
                   type="text"
-                  placeholder="Where do you want to go?"
+                  placeholder={t('home.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 px-3 py-2.5 text-sm bg-transparent border-none outline-none placeholder:text-slate-400"
                 />
                 <Button type="submit" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-6 h-10 text-sm font-semibold shadow-md shadow-emerald-600/25">
-                  <Search size={16} className="mr-1.5" /> Search
+                  <Search size={16} className="mr-1.5" /> {t('home.search')}
                 </Button>
               </div>
             </form>
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-10 text-sm font-semibold rounded-xl shadow-md shadow-emerald-600/25">
-                <Link to="/explore">Browse All Listings</Link>
+                <Link to="/explore">{t('home.browseAll')}</Link>
               </Button>
               {!user && (
                 <Button asChild variant="outline" className="px-8 h-10 text-sm font-semibold rounded-xl border-slate-200 hover:bg-slate-50">
-                  <Link to="/auth">Sign Up Free</Link>
+                  <Link to="/auth">{t('home.signUpFree')}</Link>
                 </Button>
               )}
             </div>
@@ -232,15 +234,15 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-10 text-xs text-slate-400">
               <div className="flex items-center gap-2">
                 <Shield size={16} className="text-emerald-500" />
-                <span>Verified properties</span>
+                <span>{t('home.verifiedProperties')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock size={16} className="text-emerald-500" />
-                <span>Instant booking</span>
+                <span>{t('home.instantBooking')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Globe size={16} className="text-emerald-500" />
-                <span>{stats.cities > 0 ? `${stats.cities} cities` : 'Multiple cities'}</span>
+                <span>{stats.cities > 0 ? t('home.cities', { count: stats.cities }) : t('home.multipleCities')}</span>
               </div>
             </div>
           </div>
@@ -253,10 +255,10 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
           <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { label: 'Properties', value: formatStat(stats.properties), icon: Home, color: 'emerald' },
-                { label: 'Members', value: formatStat(stats.guests), icon: Users, color: 'teal' },
-                { label: 'Bookings', value: formatStat(stats.bookings), icon: CheckCircle, color: 'cyan' },
-                { label: 'Cities', value: formatStat(stats.cities), icon: Building, color: 'green' },
+                { label: t('home.stats.properties'), value: formatStat(stats.properties), icon: Home, color: 'emerald' },
+                { label: t('home.stats.members'), value: formatStat(stats.guests), icon: Users, color: 'teal' },
+                { label: t('home.stats.bookings'), value: formatStat(stats.bookings), icon: CheckCircle, color: 'cyan' },
+                { label: t('home.stats.cities'), value: formatStat(stats.cities), icon: Building, color: 'green' },
               ].map((stat, i) => (
                 <div key={i} className="text-center group cursor-default">
                   <div className="inline-flex p-2.5 rounded-xl bg-emerald-50 text-emerald-600 mb-2 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-600/25">
@@ -279,13 +281,13 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <div className="h-1 w-8 rounded-full bg-emerald-500" />
-                  <span className="text-sm font-semibold text-emerald-600 uppercase tracking-wider">Explore</span>
+                  <span className="text-sm font-semibold text-emerald-600 uppercase tracking-wider">{t('home.explore')}</span>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900">Popular Destinations</h2>
-                <p className="text-slate-500 mt-1 text-base">Trending cities our guests can't stop visiting.</p>
+                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900">{t('home.popularDestinations')}</h2>
+                <p className="text-slate-500 mt-1 text-base">{t('home.popularSubtitle')}</p>
               </div>
               <Link to="/explore" className="text-emerald-600 font-semibold flex items-center gap-1.5 hover:gap-3 transition-all group">
-                View all destinations <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                {t('home.viewAllDestinations')} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
@@ -305,11 +307,11 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
                     <div className="font-bold text-xl text-white mb-1">{c.city}</div>
                     <div className="text-white/70 text-sm flex items-center gap-1.5">
                       <MapPin size={13} />
-                      {c.count} {c.count === 1 ? 'property' : 'properties'}
+                      {c.count} {c.count === 1 ? t('home.property') : t('home.properties')}
                     </div>
                   </div>
                   <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    Explore &rarr;
+                    {t('home.exploreArrow')}
                   </div>
                 </Link>
               ))}
@@ -325,13 +327,13 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-1 w-8 rounded-full bg-emerald-500" />
-                <span className="text-sm font-semibold text-emerald-600 uppercase tracking-wider">Featured</span>
+                <span className="text-sm font-semibold text-emerald-600 uppercase tracking-wider">{t('home.featured')}</span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900">Top-Rated Stays</h2>
-              <p className="text-slate-500 mt-1 text-base">Handpicked properties loved by our community.</p>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900">{t('home.topRatedStays')}</h2>
+              <p className="text-slate-500 mt-1 text-base">{t('home.featuredSubtitle')}</p>
             </div>
             <Link to="/explore" className="text-emerald-600 font-semibold flex items-center gap-1.5 hover:gap-3 transition-all group">
-              View all <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              {t('home.viewAll')} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 
@@ -348,7 +350,7 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
                 </div>
               ))
             ) : properties.length === 0 ? (
-              <p className="text-slate-500 col-span-full text-center py-12">No properties yet. Check back soon!</p>
+              <p className="text-slate-500 col-span-full text-center py-12">{t('home.noProperties')}</p>
             ) : (
               properties.map((item) => (
                 <Link
@@ -366,7 +368,7 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
                     <FavoriteButton propertyId={item.id} userId={user?.id} />
                     {item.avg_rating >= 4.5 && (
                       <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">
-                        <Sparkles size={12} /> Top Rated
+                        <Sparkles size={12} /> {t('home.topRated')}
                       </div>
                     )}
                   </div>
@@ -386,7 +388,7 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
                     </div>
                     <div className="pt-3 border-t border-slate-100">
                       <span className="text-lg font-extrabold text-slate-900">${item.price_per_night}</span>
-                      <span className="text-slate-400 text-sm font-medium"> / night</span>
+                      <span className="text-slate-400 text-sm font-medium"> {t('home.perNight')}</span>
                     </div>
                   </div>
                 </Link>
@@ -402,17 +404,17 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
           <div className="text-center mb-10">
             <div className="flex items-center justify-center gap-2 mb-3">
               <div className="h-1 w-8 rounded-full bg-emerald-500" />
-              <span className="text-sm font-semibold text-emerald-600 uppercase tracking-wider">How it works</span>
+              <span className="text-sm font-semibold text-emerald-600 uppercase tracking-wider">{t('home.howItWorks')}</span>
               <div className="h-1 w-8 rounded-full bg-emerald-500" />
             </div>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900">Book in 3 simple steps</h2>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900">{t('home.bookInSteps')}</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             {[
-              { step: '01', title: 'Discover', desc: 'Browse verified properties in amazing destinations worldwide.', icon: Search },
-              { step: '02', title: 'Book', desc: 'Reserve instantly with secure payments and flexible cancellation.', icon: CheckCircle },
-              { step: '03', title: 'Enjoy', desc: 'Arrive and experience your perfect home away from home.', icon: Sparkles },
+              { step: '01', title: t('home.step1Title'), desc: t('home.step1Desc'), icon: Search },
+              { step: '02', title: t('home.step2Title'), desc: t('home.step2Desc'), icon: CheckCircle },
+              { step: '03', title: t('home.step3Title'), desc: t('home.step3Desc'), icon: Sparkles },
             ].map((item, i) => (
               <div key={i} className="relative text-center group">
                 {i < 2 && (
@@ -446,35 +448,35 @@ const HomePage: React.FC<HomePageProps> = ({ user }) => {
             <div className="relative p-8 md:p-14 text-center">
               <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold px-3 py-1 rounded-full mb-6">
                 <Sparkles size={14} />
-                {user ? 'Your next step' : 'Get started today'}
+                {user ? t('home.yourNextStep') : t('home.getStarted')}
               </div>
 
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">
                 {user
-                  ? role === 'host' ? 'List your space and\nstart earning today' : 'Become a host and\nstart earning today'
-                  : 'Ready to start your\nnext adventure?'}
+                  ? role === 'host' ? t('home.ctaHostTitle') : t('home.ctaBecomeHostTitle')
+                  : t('home.ctaGuestTitle')}
               </h2>
               <p className="text-slate-400 max-w-xl mx-auto mb-8 text-base leading-relaxed">
-                Join our community of hosts and travelers. Whether you're looking to book or host, PrimeRent makes it simple.
+                {t('home.ctaSubtitle')}
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 {user ? (
                   role === 'host' ? (
                     <Button asChild className="bg-emerald-500 hover:bg-emerald-400 text-white px-8 h-10 text-sm font-semibold rounded-xl shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl hover:shadow-emerald-500/30">
-                      <Link to="/host/create-listing">Create a Listing</Link>
+                      <Link to="/host/create-listing">{t('home.createListing')}</Link>
                     </Button>
                   ) : (
                     <Button asChild className="bg-emerald-500 hover:bg-emerald-400 text-white px-8 h-10 text-sm font-semibold rounded-xl shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl hover:shadow-emerald-500/30">
-                      <Link to="/host/dashboard">Become a Host</Link>
+                      <Link to="/host/dashboard">{t('home.becomeHost')}</Link>
                     </Button>
                   )
                 ) : (
                   <Button asChild className="bg-emerald-500 hover:bg-emerald-400 text-white px-8 h-10 text-sm font-semibold rounded-xl shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl hover:shadow-emerald-500/30">
-                    <Link to="/auth">Join PrimeRent Now</Link>
+                    <Link to="/auth">{t('home.joinNow')}</Link>
                   </Button>
                 )}
                 <Button asChild variant="outline" className="px-8 h-10 text-sm font-semibold rounded-xl border-slate-600 text-slate-300 hover:bg-white/10 hover:text-white hover:border-slate-500 transition-all">
-                  <Link to="/explore">Explore Properties</Link>
+                  <Link to="/explore">{t('home.exploreProperties')}</Link>
                 </Button>
               </div>
             </div>

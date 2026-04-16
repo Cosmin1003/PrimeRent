@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { supabase } from "../supabaseClient";
 import {
   Building2,
@@ -69,6 +70,7 @@ function LocationPicker({
 }
 
 export default function CreateListingPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const isEditMode = !!id;
 
@@ -188,7 +190,7 @@ export default function CreateListingPage() {
     // 1. If we are in Edit Mode and the URL is a remote Supabase URL
     if (isEditMode && urlToRemove.includes("supabase.co")) {
       const confirmDelete = window.confirm(
-        "Are you sure you want to permanently delete this photo?",
+        t('createListing.deletePhotoConfirm'),
       );
       if (!confirmDelete) return;
 
@@ -211,7 +213,7 @@ export default function CreateListingPage() {
         }
       } catch (error) {
         console.error("Error deleting image:", error);
-        alert("Failed to delete image from server.");
+        alert(t('createListing.errorDeleteImage'));
         return;
       }
     }
@@ -270,7 +272,7 @@ export default function CreateListingPage() {
       setPreviews(property.property_images.map((img: any) => img.url));
     } catch (error) {
       console.error("Error loading property:", error);
-      alert("Could not load property data");
+      alert(t('createListing.errorLoadProperty'));
     } finally {
       setLoading(false);
     }
@@ -490,8 +492,8 @@ export default function CreateListingPage() {
         }
       }
 
-      if (isEditMode) alert("Property updated successfully!");
-      else alert("Property listed successfully!");
+      if (isEditMode) alert(t('createListing.successEdit'));
+      else alert(t('createListing.successCreate'));
 
       navigate("/host/manage-listings"); // or wherever you want to go
     } catch (error: any) {
@@ -506,7 +508,7 @@ export default function CreateListingPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-emerald-600 font-medium">
-          Verifying host status...
+          {t('createListing.loading')}
         </div>
       </div>
     );
@@ -518,13 +520,12 @@ export default function CreateListingPage() {
         <div className="bg-rose-50 text-rose-600 p-4 rounded-full mb-4">
           <AlertCircle size={40} />
         </div>
-        <h2 className="text-2xl font-bold text-slate-900">Access Denied</h2>
+        <h2 className="text-2xl font-bold text-slate-900">{t('createListing.accessDenied')}</h2>
         <p className="text-slate-500 mt-2 max-w-sm">
-          Only registered hosts can list new properties. Please upgrade your
-          account in the profile section.
+          {t('createListing.accessDeniedDesc')}
         </p>
         <Button className="mt-6" onClick={() => navigate("/profile")}>
-          Go to Profile
+          {t('createListing.goToProfile')}
         </Button>
       </div>
     );
@@ -542,16 +543,16 @@ export default function CreateListingPage() {
             size={20}
             className="group-hover:-translate-x-1 transition-transform"
           />
-          <span className="font-medium">Back</span>
+          <span className="font-medium">{t('createListing.back')}</span>
         </button>
 
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
-              {isEditMode ? "Edit your space" : "List your space"}
+              {isEditMode ? t('createListing.titleEdit') : t('createListing.titleCreate')}
             </h1>
             <p className="text-slate-500 mt-2">
-              Fill in the details to start reaching guests.
+              {t('createListing.subtitle')}
             </p>
           </div>
           <div className="hidden md:block">
@@ -566,8 +567,7 @@ export default function CreateListingPage() {
             {/* Header and Button Container */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h3 className="text-xl font-bold flex items-center gap-2">
-                <Building2 className="text-emerald-600" size={20} /> General
-                Information
+                <Building2 className="text-emerald-600" size={20} /> {t('createListing.generalInfo')}
               </h3>
               
               {/* AI MAGIC BUTTON (Moved to the top!) */}
@@ -580,15 +580,15 @@ export default function CreateListingPage() {
                 className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 transition-colors w-full sm:w-auto cursor-pointer"
               >
                 <Sparkles size={16} className="mr-2" />
-                {isGenerating ? "AI is writing..." : "Auto-Generate Title & Description"}
+                {isGenerating ? t('createListing.aiGenerating') : t('createListing.aiGenerate')}
               </Button>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="title">Property Title</Label>
+              <Label htmlFor="title">{t('createListing.propertyTitle')}</Label>
               <Input
                 id="title"
-                placeholder="e.g., Luxury Beachfront Villa"
+                placeholder={t('createListing.titlePlaceholder')}
                 required
                 className="rounded-xl border-slate-200"
                 value={formData.title}
@@ -599,10 +599,10 @@ export default function CreateListingPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t('createListing.description')}</Label>
               <Textarea
                 id="description"
-                placeholder="Describe what makes your space unique..."
+                placeholder={t('createListing.descriptionPlaceholder')}
                 rows={5}
                 className="rounded-xl border-slate-200 resize-none"
                 value={formData.description}
@@ -616,7 +616,7 @@ export default function CreateListingPage() {
           {/* --- IMAGE UPLOAD SECTION --- */}
           <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm space-y-6">
             <h3 className="text-xl font-bold flex items-center gap-2">
-              <ImageIcon className="text-emerald-600" size={20} /> Photos
+              <ImageIcon className="text-emerald-600" size={20} /> {t('createListing.photos')}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -633,10 +633,10 @@ export default function CreateListingPage() {
                   <UploadCloud className="text-emerald-600" size={24} />
                 </div>
                 <h4 className="font-semibold text-slate-900">
-                  Click to upload photos
+                  {t('createListing.uploadPhotos')}
                 </h4>
                 <p className="text-sm text-slate-500 mt-1">
-                  SVG, PNG, JPG or GIF (max 5MB)
+                  {t('createListing.uploadHint')}
                 </p>
               </div>
 
@@ -661,7 +661,7 @@ export default function CreateListingPage() {
                     </button>
                     {index === 0 && (
                       <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded">
-                        MAIN COVER
+                        {t('createListing.mainCover')}
                       </div>
                     )}
                   </div>
@@ -673,15 +673,15 @@ export default function CreateListingPage() {
           {/* --- LOCATION & MAP --- */}
           <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm space-y-6">
             <h3 className="text-xl font-bold flex items-center gap-2">
-              <MapPin className="text-emerald-600" size={20} /> Location
+              <MapPin className="text-emerald-600" size={20} /> {t('createListing.location')}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
+                <Label htmlFor="city">{t('createListing.city')}</Label>
                 <Input
                   id="city"
-                  placeholder="e.g., New York"
+                  placeholder={t('createListing.cityPlaceholder')}
                   required
                   className="rounded-xl border-slate-200"
                   value={formData.city}
@@ -691,10 +691,10 @@ export default function CreateListingPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address">Full Address</Label>
+                <Label htmlFor="address">{t('createListing.fullAddress')}</Label>
                 <Input
                   id="address"
-                  placeholder="Street, Building, Apt #"
+                  placeholder={t('createListing.addressPlaceholder')}
                   required
                   className="rounded-xl border-slate-200"
                   value={formData.address}
@@ -707,7 +707,7 @@ export default function CreateListingPage() {
 
             {/* MAP SECTION */}
             <div className="space-y-4">
-              <Label>Set Exact Location (Click on Map)</Label>
+              <Label>{t('createListing.setLocation')}</Label>
               <div className="h-72 w-full rounded-2xl overflow-hidden border border-slate-200 relative z-10">
                 <MapContainer
                   center={[formData.lat, formData.lng]}
@@ -734,7 +734,7 @@ export default function CreateListingPage() {
                     htmlFor="lat"
                     className="text-[10px] text-slate-400 uppercase font-bold"
                   >
-                    Latitude
+                    {t('createListing.latitude')}
                   </Label>
                   <Input
                     id="lat"
@@ -754,7 +754,7 @@ export default function CreateListingPage() {
                     htmlFor="lng"
                     className="text-[10px] text-slate-400 uppercase font-bold"
                   >
-                    Longitude
+                    {t('createListing.longitude')}
                   </Label>
                   <Input
                     id="lng"
@@ -776,13 +776,13 @@ export default function CreateListingPage() {
           {/* --- PRICING & CAPACITY --- */}
           <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm space-y-6">
             <h3 className="text-xl font-bold flex items-center gap-2">
-              <Info className="text-emerald-600" size={20} /> Pricing & Capacity
+              <Info className="text-emerald-600" size={20} /> {t('createListing.pricingCapacity')}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
                 <Label htmlFor="price" className="flex items-center gap-2">
-                  <DollarSign size={14} /> Price per Night
+                  <DollarSign size={14} /> {t('createListing.pricePerNight')}
                 </Label>
                 <Input
                   id="price"
@@ -802,7 +802,7 @@ export default function CreateListingPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="guests" className="flex items-center gap-2">
-                  <Users size={14} /> Max Guests
+                  <Users size={14} /> {t('createListing.maxGuests')}
                 </Label>
                 <Input
                   id="guests"
@@ -825,7 +825,7 @@ export default function CreateListingPage() {
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label className="text-xs uppercase font-bold text-slate-400 flex items-center gap-1">
-                  <Bed size={12} /> Bedrooms
+                  <Bed size={12} /> {t('createListing.bedrooms')}
                 </Label>
                 <Input
                   type="number"
@@ -842,7 +842,7 @@ export default function CreateListingPage() {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs uppercase font-bold text-slate-400 flex items-center gap-1">
-                  Beds
+                  {t('createListing.beds')}
                 </Label>
                 <Input
                   type="number"
@@ -856,7 +856,7 @@ export default function CreateListingPage() {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs uppercase font-bold text-slate-400 flex items-center gap-1">
-                  <Bath size={12} /> Baths
+                  <Bath size={12} /> {t('createListing.baths')}
                 </Label>
                 <Input
                   type="number"
@@ -878,10 +878,10 @@ export default function CreateListingPage() {
           {/* --- AMENITIES SECTION --- */}
           <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm space-y-6">
             <h3 className="text-xl font-bold flex items-center gap-2">
-              <Sparkles className="text-emerald-600" size={20} /> Amenities
+              <Sparkles className="text-emerald-600" size={20} /> {t('createListing.amenities')}
             </h3>
             <p className="text-sm text-slate-500">
-              Select all that apply to your property.
+              {t('createListing.amenitiesHint')}
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -924,7 +924,7 @@ export default function CreateListingPage() {
               onClick={() => navigate(-1)}
               className="px-8 rounded-xl"
             >
-              Cancel
+              {t('createListing.cancel')}
             </Button>
             <Button
               type="submit"
@@ -932,10 +932,10 @@ export default function CreateListingPage() {
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-6 rounded-xl text-lg font-bold shadow-lg shadow-emerald-200 transition-all active:scale-[0.98]"
             >
               {submitting
-                ? "Saving..."
+                ? t('createListing.saving')
                 : isEditMode
-                  ? "Save Changes"
-                  : "List Property"}
+                  ? t('createListing.saveChanges')
+                  : t('createListing.listProperty')}
             </Button>
           </div>
         </form>

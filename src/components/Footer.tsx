@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Facebook,
   Twitter,
@@ -26,6 +27,7 @@ interface FooterProps {
 }
 
 const Footer: React.FC<FooterProps> = ({ user }) => {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
   const [role, setRole] = useState<string | null>(null);
 
@@ -61,7 +63,7 @@ const Footer: React.FC<FooterProps> = ({ user }) => {
               PRIME<span className="text-emerald-500">RENT</span>
             </Link>
             <p className="text-slate-400 mb-6 text-sm leading-relaxed">
-              Find and book your perfect stay, or share your property with travelers worldwide. Simple, secure, and seamless.
+              {t('footer.brandDescription')}
             </p>
             <ul className="space-y-3 text-sm">
               <li>
@@ -85,26 +87,26 @@ const Footer: React.FC<FooterProps> = ({ user }) => {
 
           {/* Discover */}
           <div>
-            <h4 className="text-white font-semibold mb-6">Discover</h4>
+            <h4 className="text-white font-semibold mb-6">{t('footer.discover')}</h4>
             <ul className="space-y-4 text-sm">
               <li>
                 <Link to="/" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
-                  <Home size={14} className="shrink-0" /> Home
+                  <Home size={14} className="shrink-0" /> {t('footer.home')}
                 </Link>
               </li>
               <li>
                 <Link to="/explore" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
-                  <Search size={14} className="shrink-0" /> Explore Properties
+                  <Search size={14} className="shrink-0" /> {t('footer.exploreProperties')}
                 </Link>
               </li>
               <li>
                 <Link to="/favorites" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
-                  <Heart size={14} className="shrink-0" /> My Favorites
+                  <Heart size={14} className="shrink-0" /> {t('footer.myFavorites')}
                 </Link>
               </li>
               <li>
                 <Link to="/bookings" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
-                  <CalendarDays size={14} className="shrink-0" /> My Bookings
+                  <CalendarDays size={14} className="shrink-0" /> {t('footer.myBookings')}
                 </Link>
               </li>
             </ul>
@@ -112,27 +114,27 @@ const Footer: React.FC<FooterProps> = ({ user }) => {
 
           {/* Hosting */}
           <div>
-            <h4 className="text-white font-semibold mb-6">Hosting</h4>
+            <h4 className="text-white font-semibold mb-6">{t('footer.hosting')}</h4>
             {role === 'host' ? (
               <ul className="space-y-4 text-sm">
                 <li>
                   <Link to="/host/dashboard" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
-                    <LayoutDashboard size={14} className="shrink-0" /> Host Dashboard
+                    <LayoutDashboard size={14} className="shrink-0" /> {t('footer.hostDashboard')}
                   </Link>
                 </li>
                 <li>
                   <Link to="/host/create-listing" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
-                    <PlusCircle size={14} className="shrink-0" /> Create Listing
+                    <PlusCircle size={14} className="shrink-0" /> {t('footer.createListing')}
                   </Link>
                 </li>
                 <li>
                   <Link to="/host/manage-listings" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
-                    <List size={14} className="shrink-0" /> Manage Listings
+                    <List size={14} className="shrink-0" /> {t('footer.manageListings')}
                   </Link>
                 </li>
                 <li>
                   <Link to="/host/reservations" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
-                    <ClipboardList size={14} className="shrink-0" /> Reservations
+                    <ClipboardList size={14} className="shrink-0" /> {t('footer.reservations')}
                   </Link>
                 </li>
               </ul>
@@ -140,11 +142,11 @@ const Footer: React.FC<FooterProps> = ({ user }) => {
               <ul className="space-y-4 text-sm">
                 <li>
                   <Link to="/host/dashboard" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
-                    <UserPlus size={14} className="shrink-0" /> Become a Host
+                    <UserPlus size={14} className="shrink-0" /> {t('footer.becomeHost')}
                   </Link>
                 </li>
                 <li className="text-slate-500 text-xs leading-relaxed">
-                  List your property and start earning with PrimeRent.
+                  {t('footer.becomeHostDesc')}
                 </li>
               </ul>
             )}
@@ -152,17 +154,17 @@ const Footer: React.FC<FooterProps> = ({ user }) => {
 
           {/* Account & Social */}
           <div>
-            <h4 className="text-white font-semibold mb-6">Account</h4>
+            <h4 className="text-white font-semibold mb-6">{t('footer.account')}</h4>
             <ul className="space-y-4 text-sm mb-8">
               <li>
-                <Link to="/profile" className="hover:text-emerald-500 transition-colors">My Profile</Link>
+                <Link to="/profile" className="hover:text-emerald-500 transition-colors">{t('footer.myProfile')}</Link>
               </li>
               <li>
-                <Link to="/auth" className="hover:text-emerald-500 transition-colors">Log In / Sign Up</Link>
+                <Link to="/auth" className="hover:text-emerald-500 transition-colors">{t('footer.logInSignUp')}</Link>
               </li>
             </ul>
 
-            <h4 className="text-white font-semibold mb-4">Follow Us</h4>
+            <h4 className="text-white font-semibold mb-4">{t('footer.followUs')}</h4>
             <div className="flex gap-3">
               <a
                 href="https://facebook.com"
@@ -207,7 +209,7 @@ const Footer: React.FC<FooterProps> = ({ user }) => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-slate-500">
-            © {currentYear} PrimeRent Inc. All rights reserved.
+            {t('footer.allRightsReserved', { year: currentYear })}
           </p>
 
           <button

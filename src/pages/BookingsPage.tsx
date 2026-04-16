@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { format } from "date-fns";
 import { Calendar, MapPin, CreditCard, ChevronRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 export default function BookingsPage() {
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -68,7 +70,7 @@ export default function BookingsPage() {
   if (loading) {
     return (
       <div className="container max-w-5xl mx-auto px-6 pt-32 text-center">
-        <p className="text-gray-500 animate-pulse">Retrieving your trips...</p>
+        <p className="text-gray-500 animate-pulse">{t('bookings.loading')}</p>
       </div>
     );
   }
@@ -98,10 +100,10 @@ export default function BookingsPage() {
     <div className="bg-white min-h-screen pt-28 pb-20">
       <div className="container max-w-5xl mx-auto px-6">
         <h1 className="text-3xl font-black tracking-tight text-black mb-2">
-          Trips
+          {t('bookings.title')}
         </h1>
         <p className="text-gray-500 mb-10">
-          Manage your upcoming and past stays.
+          {t('bookings.subtitle')}
         </p>
 
         {bookings.length > 0 ? (
@@ -119,15 +121,15 @@ export default function BookingsPage() {
             <div className="bg-emerald-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <Calendar className="text-emerald-600 size-8" />
             </div>
-            <h3 className="text-xl font-bold">No trips booked... yet!</h3>
+            <h3 className="text-xl font-bold">{t('bookings.noTrips')}</h3>
             <p className="text-gray-500 mb-6">
-              Time to dust off your bags and start exploring.
+              {t('bookings.noTripsHint')}
             </p>
             <Button
               asChild
               className="bg-black hover:bg-emerald-600 rounded-full px-8"
             >
-              <Link to="/explore">Start Searching</Link>
+              <Link to="/explore">{t('bookings.startSearching')}</Link>
             </Button>
           </div>
         )}
@@ -143,6 +145,7 @@ function BookingCard({
   booking: Booking;
   onCancel: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const statusColors: Record<string, string> = {
     confirmed: "bg-emerald-100 text-emerald-700",
     pending: "bg-amber-100 text-amber-700",
@@ -233,7 +236,7 @@ function BookingCard({
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 flex-1">
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-black text-gray-400">
-                Check-in
+                {t('bookings.checkIn')}
               </span>
               <span className="font-bold text-sm">
                 {format(new Date(booking.check_in), "MMM dd, yyyy")}
@@ -241,7 +244,7 @@ function BookingCard({
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-black text-gray-400">
-                Check-out
+                {t('bookings.checkOut')}
               </span>
               <span className="font-bold text-sm">
                 {format(new Date(booking.check_out), "MMM dd, yyyy")}
@@ -249,7 +252,7 @@ function BookingCard({
             </div>
             <div className="flex flex-col col-span-2 md:col-span-1">
               <span className="text-[10px] uppercase font-black text-gray-400 text-emerald-600">
-                Total Paid
+                {t('bookings.totalPaid')}
               </span>
               <span className="font-bold text-sm flex items-center gap-1">
                 <CreditCard className="size-3" /> ${booking.total_price}
@@ -264,12 +267,12 @@ function BookingCard({
               size="sm"
               className="text-red-500 border-red-100 hover:bg-red-50 hover:text-red-600 rounded-xl font-bold text-xs"
               onClick={() => {
-                if (confirm("Are you sure you want to cancel this trip?")) {
+                if (confirm(t('bookings.cancelConfirm'))) {
                   onCancel(booking.id);
                 }
               }}
             >
-              Cancel Trip
+              {t('bookings.cancelTrip')}
             </Button>
           )}
 
@@ -280,19 +283,19 @@ function BookingCard({
                   size="sm"
                   className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs"
                 >
-                  Add Review
+                  {t('bookings.addReview')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px] rounded-3xl">
                 <DialogHeader>
                   <DialogTitle className="text-xl font-bold">
-                    Review your stay at {booking.properties.title}
+                    {t('bookings.reviewTitle', { title: booking.properties.title })}
                   </DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="flex flex-col items-center gap-2">
                     <span className="text-sm font-medium text-gray-500">
-                      How was your experience?
+                      {t('bookings.reviewPrompt')}
                     </span>
                     <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map((star) => (
@@ -312,7 +315,7 @@ function BookingCard({
                   <div className="flex flex-col gap-2">
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium text-gray-500">
-                        Your comments
+                        {t('bookings.yourComments')}
                       </span>
                       {/* Character Counter */}
                       <span
@@ -322,7 +325,7 @@ function BookingCard({
                       </span>
                     </div>
                     <Textarea
-                      placeholder="Share details of your stay..."
+                      placeholder={t('bookings.reviewPlaceholder')}
                       className="rounded-xl resize-none max-h-[150px] overflow-y-auto break-all whitespace-pre-wrap"
                       rows={4}
                       value={comment}
@@ -337,7 +340,7 @@ function BookingCard({
                     disabled={submitting}
                     className="w-full bg-black hover:bg-emerald-600 rounded-full"
                   >
-                    {submitting ? "Submitting..." : "Post Review"}
+                    {submitting ? t('bookings.submitting') : t('bookings.postReview')}
                   </Button>
                 </DialogFooter>
               </DialogContent>

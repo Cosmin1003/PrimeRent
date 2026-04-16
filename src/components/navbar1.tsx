@@ -1,9 +1,11 @@
 "use client";
 
 import { Menu, LogOut, Search, Heart } from "lucide-react";
-import { Link } from "react-router-dom"; // Added for routing
-import { supabase } from "../supabaseClient"; // Import your client
+import { Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
+import { supabase } from "../supabaseClient";
 import { cn } from "@/lib/utils";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 import {
   Accordion,
@@ -33,6 +35,7 @@ interface NavbarProps {
 }
 
 const Navbar1 = ({ user, className }: NavbarProps) => {
+  const { t } = useTranslation();
   const [profileName, setProfileName] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
 
@@ -94,7 +97,7 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                     className="flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 shadow-sm rounded-full text-[18px] font-bold text-black hover:shadow-md hover:border-emerald-500 transition-all group"
                   >
                     <Search className="size-4 text-emerald-600 group-hover:scale-110 transition-transform" />
-                    <span>Explore Destinations</span>
+                    <span>{t('navbar.exploreDestinations')}</span>
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
@@ -103,7 +106,7 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                     className="group/favorites flex items-center gap-2 text-[18px] font-bold text-black hover:text-emerald-600 transition-colors"
                   >
                     <Heart className="size-5 fill-black group-hover/favorites:fill-emerald-600 transition-colors" />
-                    <span>Favorites</span>
+                    <span>{t('navbar.favorites')}</span>
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
@@ -111,7 +114,7 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                     to="/bookings"
                     className="text-[18px] font-bold text-black hover:text-emerald-600 transition-colors"
                   >
-                    My Bookings
+                    {t('navbar.myBookings')}
                   </Link>
                 </NavigationMenuItem>
                 {role === "host" && (
@@ -120,7 +123,7 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                       to="/host/dashboard"
                       className="text-[18px] font-bold text-black hover:text-emerald-600 transition-colors"
                     >
-                      Dashboard
+                      {t('navbar.dashboard')}
                     </Link>
                   </NavigationMenuItem>
                 )}
@@ -128,7 +131,8 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
             </NavigationMenu>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <LanguageSwitcher />
             {user ? (
               <div className="flex items-center gap-4">
                 <Link
@@ -143,7 +147,7 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                   onClick={handleLogout}
                   className="text-gray-700 hover:text-red-600 hover:bg-red-50 font-bold"
                 >
-                  <LogOut className="mr-2 size-4" /> Sign Out
+                  <LogOut className="mr-2 size-4" /> {t('navbar.signOut')}
                 </Button>
               </div>
             ) : (
@@ -152,7 +156,7 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                 size="sm"
                 className="bg-black hover:bg-emerald-600 rounded-full px-8 py-5 transition-all "
               >
-                <Link to="/auth">Log in</Link>
+                <Link to="/auth">{t('navbar.logIn')}</Link>
               </Button>
             )}
           </div>
@@ -187,10 +191,10 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                 <div className="flex flex-col gap-6 p-4">
                   <div className="flex flex-col gap-4">
                     <Link to="/explore" className="text-md font-semibold">
-                      Explore
+                      {t('navbar.explore')}
                     </Link>
                     <Link to="/bookings" className="text-md font-semibold">
-                      My Bookings
+                      {t('navbar.myBookings')}
                     </Link>
                   </div>
 
@@ -201,11 +205,11 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                         onClick={handleLogout}
                         className="w-full cursor-pointer"
                       >
-                        Sign Out
+                        {t('navbar.signOut')}
                       </Button>
                     ) : (
                       <Button asChild className="w-full bg-black">
-                        <Link to="/auth">Log in</Link>
+                        <Link to="/auth">{t('navbar.logIn')}</Link>
                       </Button>
                     )}
                   </div>

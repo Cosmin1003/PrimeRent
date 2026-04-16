@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
+import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { User, Phone, Calendar, Image as ImageIcon, ShieldCheck, Rocket } from "lucide-react";
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [profile, setProfile] = useState({
@@ -61,12 +63,12 @@ export default function ProfilePage() {
       .eq("id", user?.id);
 
     if (error) alert(error.message);
-    else alert("Profile updated successfully!");
+    else alert(t('profile.profileUpdated'));
     setUpdating(false);
   }
 
   async function handleBecomeHost() {
-    if (!confirm("Are you sure you want to become a host? This will allow you to list properties.")) return;
+    if (!confirm(t('profile.becomeHostConfirm'))) return;
     
     setUpdating(true);
     const { data: { user } } = await supabase.auth.getUser();
@@ -80,7 +82,7 @@ export default function ProfilePage() {
       alert(error.message);
     } else {
       setProfile(prev => ({ ...prev, role: 'host' }));
-      alert("Congratulations! You are now a host.");
+      alert(t('profile.becomeHostSuccess'));
     }
     setUpdating(false);
   }
@@ -92,7 +94,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-pulse text-emerald-600 font-medium">Loading your profile...</div>
+        <div className="animate-pulse text-emerald-600 font-medium">{t('profile.loading')}</div>
       </div>
     );
   }
@@ -103,8 +105,8 @@ export default function ProfilePage() {
         {/* --- HEADER --- */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Personal Info</h1>
-            <p className="text-slate-500 mt-2 text-lg">Manage your PrimeRent identity and preferences.</p>
+            <h1 className="text-4xl font-bold text-slate-900 tracking-tight">{t('profile.title')}</h1>
+            <p className="text-slate-500 mt-2 text-lg">{t('profile.subtitle')}</p>
           </div>
           <Badge variant="outline" className={`py-1.5 px-4 text-sm font-semibold capitalize border-2 shadow-sm ${
             profile.role === 'host' ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 
@@ -112,7 +114,7 @@ export default function ProfilePage() {
             'border-slate-200 bg-white text-slate-700'
           }`}>
             <ShieldCheck className="size-4 mr-2" />
-            {profile.role} Account
+            {t('profile.account', { role: profile.role })}
           </Badge>
         </div>
 
@@ -134,15 +136,15 @@ export default function ProfilePage() {
             <div className="flex-1 w-full space-y-4">
               <div className="space-y-2">
                 <Label className="text-slate-900 font-semibold flex items-center gap-2">
-                  <ImageIcon size={14} className="text-slate-400" /> Avatar Image URL
+                  <ImageIcon size={14} className="text-slate-400" /> {t('profile.avatarUrl')}
                 </Label>
                 <Input 
-                  placeholder="Paste your image link here..."
+                  placeholder={t('profile.avatarPlaceholder')}
                   className="rounded-xl border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
                   value={profile.avatar_url} 
                   onChange={e => setProfile({...profile, avatar_url: e.target.value})} 
                 />
-                <p className="text-[11px] text-slate-400">Recommended: Square image, minimum 400x400px.</p>
+                <p className="text-[11px] text-slate-400">{t('profile.avatarHint')}</p>
               </div>
             </div>
           </div>
@@ -152,7 +154,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
                 <Label className="text-slate-900 font-semibold flex items-center gap-2">
-                  <User size={14} className="text-slate-400" /> Full Name
+                  <User size={14} className="text-slate-400" /> {t('profile.fullName')}
                 </Label>
                 <Input 
                   className="rounded-xl border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
@@ -162,7 +164,7 @@ export default function ProfilePage() {
               </div>
               <div className="space-y-2">
                 <Label className="text-slate-900 font-semibold flex items-center gap-2">
-                  <Phone size={14} className="text-slate-400" /> Phone Number
+                  <Phone size={14} className="text-slate-400" /> {t('profile.phoneNumber')}
                 </Label>
                 <Input 
                   className="rounded-xl border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
@@ -174,7 +176,7 @@ export default function ProfilePage() {
 
             <div className="space-y-2 max-w-md">
               <Label className="text-slate-900 font-semibold flex items-center gap-2">
-                <Calendar size={14} className="text-slate-400" /> Birth Date
+                <Calendar size={14} className="text-slate-400" /> {t('profile.birthDate')}
               </Label>
               <Input 
                 type="date"
@@ -190,7 +192,7 @@ export default function ProfilePage() {
                 disabled={updating} 
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-6 rounded-xl text-lg font-bold transition-all active:scale-[0.98] w-full md:w-auto"
               >
-                {updating ? "Updating..." : "Save Changes"}
+                {updating ? t('profile.saving') : t('profile.saveChanges')}
               </Button>
             </div>
           </div>
@@ -202,16 +204,16 @@ export default function ProfilePage() {
               <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="text-center md:text-left">
                   <h3 className="text-2xl font-bold flex items-center justify-center md:justify-start gap-3">
-                    <Rocket className="text-emerald-500" /> List your space on PrimeRent
+                    <Rocket className="text-emerald-500" /> {t('profile.becomeHostTitle')}
                   </h3>
-                  <p className="text-slate-400 mt-2">Transform your home into a thriving business and earn more income.</p>
+                  <p className="text-slate-400 mt-2">{t('profile.becomeHostSubtitle')}</p>
                 </div>
                 <Button 
                   onClick={handleBecomeHost}
                   disabled={updating}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-6 rounded-xl transition-all"
                 >
-                  Become a Host
+                  {t('profile.becomeHost')}
                 </Button>
               </div>
             </div>
