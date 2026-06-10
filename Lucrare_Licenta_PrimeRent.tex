@@ -953,6 +953,8 @@ Din partea oaspetelui, \texttt{BookingsPage} afișează rezervările cu etichete
 
 Din partea gazdei, \texttt{HostReservationsPage} preia rezervările pending prin join cu tabela \texttt{properties}. Acceptarea sau refuzarea se face prin aceeași funcție \texttt{updateStatus}.
 
+La finalizarea cu succes a unei rezervări, platforma trimite automat oaspetelui un email de confirmare cu detaliile sejurului.
+
 Recenziile pot fi lăsate doar după finalizarea sejurului, printr-un dialog cu rating vizual și textarea.
 
 
@@ -1250,7 +1252,8 @@ La stânga, conținutul: o galerie asimetrică ce poate fi deschisă în ecran c
 2. Oaspetele selectează prima zi liberă, apoi selectează ultima zi. 
 3. Instantaneu, panoul calculează costurile, de exemplu: \$100/noapte $\times$ 3 nopți = \$300, adaugă taxa standardizată de curățenie de \$85, și scrie cu roșu totalul: \$385.
 4. Apasă \textbf{Reserve}. Într-o fracțiune de secundă se realizează tranziția sigură spre Stripe. 
-5. Pe serverul Stripe, introduce detaliile cardului bancar (PrimeRent acceptă chiar și plăți de testare prin carduri puse la dispoziție de dezvoltator). Plătește și este redirecționat în siguranță spre ecranul verde \textit{Success Payment} pe site-ul PrimeRent. 
+5. Pe serverul Stripe, introduce detaliile cardului bancar (PrimeRent acceptă chiar și plăți de testare prin carduri puse la dispoziție de dezvoltator). Plătește și este redirecționat în siguranță spre ecranul verde \textit{Success Payment} pe site-ul PrimeRent.
+6. Imediat după confirmarea rezervării, oaspetele primește automat un \textbf{email de confirmare} cu detaliile complete ale sejurului: proprietatea rezervată, intervalul de date și prețul total plătit.
 
 \section{Fluxul Gazdei: Adăugarea și editarea Magică cu AI a unui apartament}
 
@@ -1316,7 +1319,7 @@ Mai multe provocări tehnice au necesitat soluții creative:
 
 \section{Limitări actuale}
 
-Ca produs MVP, PrimeRent are și limite: nu trimite notificări la acceptarea/anularea rezervărilor, nu oferă mesagerie directă gazdă-oaspete, anulările nu declanșează rambursări automate prin Stripe, nu acoperă teste E2E, imaginile nu sunt optimizate la upload, prețurile sunt afișate exclusiv în USD.
+Ca produs MVP, PrimeRent are și limite: nu oferă mesagerie directă gazdă-oaspete, anulările nu declanșează rambursări automate prin Stripe, nu acoperă teste E2E, imaginile nu sunt optimizate la upload, prețurile sunt afișate exclusiv în USD.
 
 \section{Direcții de dezvoltare viitoare}
 
