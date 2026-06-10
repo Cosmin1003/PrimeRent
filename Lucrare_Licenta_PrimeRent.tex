@@ -179,7 +179,7 @@ Piața românească nu face excepție de la acest trend. Orașele mari — Bucur
 
 Pe măsură ce piața a crescut, s-au modificat și așteptările utilizatorilor. Călătorul modern nu se mai rezumă la a căuta un pat; el caută o experiență personalizată, un proces de rezervare fără fricțiuni și informații relevante prezentate clar. Din ce în ce mai frecvent, dorește recomandări adaptate preferințelor sale, nu doar filtre mecanice. Gazdele, pe de altă parte, au nevoie de instrumente care să le simplifice operațiunile zilnice: de la crearea unui anunț atractiv la gestionarea calendarului de ocupare.
 
-Tocmai aici intervine inteligența artificială ca element diferențiator. Modelele de limbaj de dimensiuni mari (LLM-urile), exemplificate de GPT-4 al OpenAI, deschid posibilități concrete: generarea automată de texte descriptive, căutare bazată pe înțelegerea limbajului natural, sinteză a recenziilor. Tehnicile de embeddings vectoriali permit compararea semantică a textelor, depășind limitările căutării clasice prin cuvinte cheie. Aceste capabilități, integrate într-o platformă de închirieri, pot ridica semnificativ calitatea experienței pentru toți participanții.
+Tocmai aici intervine inteligența artificială ca element diferențiator. Modelele de limbaj de dimensiuni mari (LLM-urile), exemplificate de Gemini 2.5 Flash al Google, deschid posibilități concrete: generarea automată de texte descriptive, căutare bazată pe înțelegerea limbajului natural, sinteză a recenziilor. Tehnicile de embeddings vectoriali permit compararea semantică a textelor, depășind limitările căutării clasice prin cuvinte cheie. Aceste capabilități, integrate într-o platformă de închirieri, pot ridica semnificativ calitatea experienței pentru toți participanții.
 
 
 \section{Motivația alegerii temei}
@@ -248,7 +248,7 @@ Documentul este organizat în nouă capitole, completate de bibliografie și ane
 
 \textbf{Capitolul 2} trece în revistă piața de închirieri pe termen scurt, analizează comparativ platformele existente și identifică oportunitățile de inovare pe care PrimeRent le adresează.
 
-\textbf{Capitolul 3} prezintă detaliat fiecare tehnologie și instrument din stack-ul ales — React, TypeScript, Vite, Tailwind CSS, Supabase, OpenAI API, Leaflet, Stripe, Vercel — justificând selecția fiecăruia.
+\textbf{Capitolul 3} prezintă detaliat fiecare tehnologie și instrument din stack-ul ales — React, TypeScript, Vite, Tailwind CSS, Supabase, Google Gemini API, Leaflet, Stripe, Vercel — justificând selecția fiecăruia.
 
 \textbf{Capitolul 4} detaliază cerințele funcționale și non-funcționale, schema bazei de date, arhitectura de ansamblu și fluxurile principale ale sistemului.
 
@@ -595,40 +595,40 @@ Stocare de fișiere compatibilă cu S3, organizată în bucket-uri. Proiectul fo
 
 \subsection{Edge Functions}
 
-Funcții serverless în TypeScript/Deno, rulate la periferia rețelei \cite{supabase-edge}. Patru Edge Functions sunt definite: \texttt{generate-listing}, \texttt{smart-search}, \texttt{summarize-reviews} și \texttt{generate-embeddings}.
+Funcții serverless în TypeScript/Deno, rulate la periferia rețelei \cite{supabase-edge}. Patru Edge Functions sunt definite: \texttt{generate-listing}, \texttt{smart-search}, \texttt{summarize-reviews} și \texttt{generate-embeddings}. Acestea utilizează Google Gemini API pentru toate operațiunile de inteligență artificială.
 
 \subsection{pgvector — Extensia pentru căutare semantică}
 
-Extensia pgvector adaugă suport pentru vectori n-dimensionali în PostgreSQL \cite{pgvector}. Fiecare proprietate are un vector de 1536 dimensiuni, generat de modelul \texttt{text-embedding-ada-002}. La o interogare semantică, query-ul utilizatorului este convertit în același spațiu vectorial, iar similaritatea cosinus identifică proprietățile cele mai relevante.
+Extensia pgvector adaugă suport pentru vectori n-dimensionali în PostgreSQL \cite{pgvector}. Fiecare proprietate are un vector de 768 dimensiuni, generat de modelul \texttt{gemini-embedding-001} al Google. La o interogare semantică, query-ul utilizatorului este convertit în același spațiu vectorial, iar similaritatea cosinus identifică proprietățile cele mai relevante.
 
 \subsection{Stripe}
 
 Lider global în procesarea plăților online \cite{stripe}. Integrarea se face prin Edge Function: cheia secretă Stripe nu este niciodată expusă în browser. Utilizatorul este redirecționat la pagina securizată Stripe pentru introducerea datelor cardului.
 
 
-\section{Inteligență Artificială — OpenAI API}
+\section{Inteligență Artificială — Google Gemini API}
 
-\subsection{GPT-4 pentru generare și sumarizare text}
+\subsection{Gemini 2.5 Flash pentru generare și sumarizare text}
 
-\textbf{GPT-4} (Generative Pre-trained Transformer 4) este un model de limbaj de mari dimensiuni (LLM) dezvoltat de OpenAI \cite{openai}. Antrenat pe un corpus vast de text, GPT-4 demonstrează capacitatea de a înțelege și genera text în limbaj natural cu o calitate remarcabilă, urmând instrucțiuni complexe prin tehnica \textbf{prompt engineering} — construirea atentă a instrucțiunilor care ghidează comportamentul modelului.
+\textbf{Gemini 2.5 Flash} este un model de limbaj de mari dimensiuni (LLM) dezvoltat de Google DeepMind \cite{gemini}. Antrenat pe un corpus vast de text și date multimodale, Gemini 2.5 Flash demonstrează capacitatea de a înțelege și genera text în limbaj natural cu o calitate remarcabilă, urmând instrucțiuni complexe prin tehnica \textbf{prompt engineering} — construirea atentă a instrucțiunilor care ghidează comportamentul modelului. Modelul suportă nativ intrări multimodale (text și imagini) și generare de conținut structurat (JSON).
 
-În PrimeRent, GPT-4 este utilizat în două Edge Functions cu scopuri distincte:
+În PrimeRent, Gemini 2.5 Flash este utilizat în trei Edge Functions cu scopuri distincte:
 
-\textbf{1. \texttt{generate-listing}} — Primește ca input un set de date structurate despre proprietate: titlul curent, adresa, numărul de camere, prețul, facilitățile selectate. Opțional, primește și prima imagine a proprietății codificată în base64. Generează un titlu optimizat (maxim 10 cuvinte) și o descriere atractivă de 150--200 de cuvinte. Suportul pentru imagini (multimodal) permite modelului să menționeze detalii vizuale din fotografii — o fereastră panoramică, o grădină înflorită — care nu sunt explicit introduse în formular.
+\textbf{1. \texttt{generate-listing}} — Primește ca input un set de date structurate despre proprietate: titlul curent, adresa, numărul de camere, prețul, facilitățile selectate. Opțional, primește și prima imagine a proprietății codificată în base64. Generează un titlu optimizat (maxim 50 de caractere) și o descriere atractivă de două paragrafe. Suportul multimodal nativ permite modelului să menționeze detalii vizuale din fotografii — o fereastră panoramică, o grădină înflorită — care nu sunt explicit introduse în formular. Apelul se face direct prin REST la endpoint-ul \texttt{generativelanguage.googleapis.com} cu parametrul \texttt{responseMimeType: "application/json"} pentru a forța returnarea de JSON valid.
 
-\textbf{2. \texttt{summarize-reviews}} — Primește lista textelor recenziilor unei proprietăți și generează un obiect JSON structurat cu trei câmpuri: o frază de sinteză generală, o listă de puncte forte (\textit{pros}) și o listă de aspecte negative (\textit{cons}). Tehnica \texttt{response\_format: \{type: "json\_object"\}} forțează modelul să returneze exclusiv JSON valid, eliminând necesitatea de a parsa text liber și reducând riscul de erori.
+\textbf{2. \texttt{summarize-reviews}} — Primește lista textelor recenziilor unei proprietăți și generează un obiect JSON structurat cu trei câmpuri: o frază de sinteză generală, o listă de puncte forte (\textit{pros}) și o listă de aspecte negative (\textit{cons}). Parametrul \texttt{responseMimeType: "application/json"} forțează modelul să returneze exclusiv JSON valid, eliminând necesitatea de a parsa text liber și reducând riscul de erori.
 
-Alegerea modelului \texttt{gpt-4o-mini} pentru sumarizare (în loc de \texttt{gpt-4o} complet) reflectă un compromis deliberat între cost și calitate: sumarizarea nu necesită același nivel de rafinament ca generarea de descrieri, iar modelul mini este semnificativ mai ieftin per token.
+\textbf{3. \texttt{smart-search}} — Utilizează modelul \texttt{gemini-2.5-flash} prin SDK-ul oficial \texttt{@google/generative-ai} (\texttt{GoogleGenerativeAI}) pentru a extrage filtre structurate din interogările în limbaj natural ale utilizatorilor.
 
-\subsection{text-embedding-ada-002 pentru căutare semantică}
+\subsection{gemini-embedding-001 pentru căutare semantică}
 
-\textbf{text-embedding-ada-002} este un model OpenAI specializat în generarea de \textbf{embeddings} — reprezentări vectoriale dense ale textului într-un spațiu matematic cu 1536 dimensiuni \cite{openai-embeddings}. Ideea fundamentală: texte cu înțeles similar sunt reprezentate prin vectori apropiați în acest spațiu (distanță cosinus mică), indiferent de vocabularul exact folosit.
+\textbf{gemini-embedding-001} este un model Google specializat în generarea de \textbf{embeddings} — reprezentări vectoriale dense ale textului într-un spațiu matematic cu 768 dimensiuni \cite{gemini-embeddings}. Ideea fundamentală: texte cu înțeles similar sunt reprezentate prin vectori apropiați în acest spațiu (distanță cosinus mică), indiferent de vocabularul exact folosit. Dimensionalitatea de ieșire (768) este configurată explicit prin parametrul \texttt{outputDimensionality}, folosind SDK-ul \texttt{@google/genai} (\texttt{GoogleGenAI}).
 
 De exemplu, textele „un apartament confortabil lângă plajă'' și „cozy beachfront flat'' vor genera vectori apropiați, chiar dacă nu au niciun cuvânt comun.
 
 Fluxul complet al căutării semantice în PrimeRent implică doi pași:
 
-\textbf{Pasul 1 — Indexare (offline).} Edge Function \texttt{generate-embeddings} procesează proprietățile din baza de date în batch-uri de 50. Pentru fiecare, concatenează titlul cu descrierea, generează embedding-ul prin API-ul OpenAI și îl stochează în coloana \texttt{embedding} (de tip \texttt{vector(1536)}) din tabela \texttt{properties}. Acest pas se rulează periodic din panoul de administrare.
+\textbf{Pasul 1 — Indexare (offline).} Edge Function \texttt{generate-embeddings} procesează proprietățile din baza de date în batch-uri de 50. Pentru fiecare, concatenează titlul, orașul și descrierea, generează embedding-ul prin API-ul Google Gemini și îl stochează în coloana \texttt{embedding} (de tip \texttt{vector(768)}) din tabela \texttt{properties}. Acest pas se rulează periodic din panoul de administrare.
 
 \textbf{Pasul 2 — Căutare (real-time).} Când un utilizator introduce un query în limbaj natural, Edge Function \texttt{smart-search} generează embedding-ul query-ului cu același model, apoi execută în PostgreSQL o interogare de tip \textit{nearest-neighbor} prin extensia pgvector. Operatorul \texttt{<=>} calculează distanța cosinus între vectorul query-ului și toți vectorii proprietăților, returnând cele mai apropiate (cele mai relevante semantic).
 
@@ -676,7 +676,7 @@ Cerințele funcționale descriu ce trebuie să facă sistemul. PrimeRent deserve
 
 \textbf{CF-G05 — Pagina de prezentare a proprietății.} Acesta este locul unde oaspetele ia decizia de închiriere. Pagina trebuie să ofere o experiență vizuală bogată: o galerie foto superioară (imaginea principală extinsă, însoțită de un grid lateral cu alte patru poze), titlu, rating mediu bazat pe numărul total de recenzii, informații complete despre gazdă (cu poză de profil și nume), o hartă mică statică centrată pe locația proprietății, o secțiune descriptivă text, o listă cu toate facilitățile incluse și secțiunea completă de recenzii anterioare.
 
-\textbf{CF-G06 — Sumarizare AI a recenziilor lungi.} Citirea a 50 de recenzii pentru o singură proprietate consumă timp prețios. Oaspetele are la dispoziție un buton „Sumarizează cu AI''. GPT-4o-mini procesează în fundal absolut toate textele lăsate de oaspeții anteriori și livrează în câteva secunde un scurt paragraf narativ de concluzie („Cei mai mulți oaspeți au apreciat curățenia impecabilă...''), urmat de o listă cu \textit{Puncte Forte} (ex: Comunicare excelentă, Vedere superbă) și o listă, critică, cu \textit{Aspecte Negative} (ex: Zgomot stradal dimineața, Presiune mică la duș).
+\textbf{CF-G06 — Sumarizare AI a recenziilor lungi.} Citirea a 50 de recenzii pentru o singură proprietate consumă timp prețios. Oaspetele are la dispoziție un buton „Sumarizează cu AI''. Gemini 2.5 Flash procesează în fundal absolut toate textele lăsate de oaspeții anteriori și livrează în câteva secunde un scurt paragraf narativ de concluzie („Cei mai mulți oaspeți au apreciat curățenia impecabilă...''), urmat de o listă cu \textit{Puncte Forte} (ex: Comunicare excelentă, Vedere superbă) și o listă, critică, cu \textit{Aspecte Negative} (ex: Zgomot stradal dimineața, Presiune mică la duș).
 
 \textbf{CF-G07 — Fluxul de rezervare cu verificare în timp real a disponibilității.} Panoul de rezervare domină partea dreaptă a paginii proprietății pe desktop (sau este lipit în partea de jos pe ecranele mobile). Acesta afișează un calendar în care datele deja rezervate de alți oaspeți sunt complet dezactivate, imposibil de selectat. Oaspetele selectează data de check-in și data de check-out. Sistemul calculează \textit{instantaneu} pe măsură ce selecția este făcută: numărul de nopți, înmulțite cu tariful pe noapte, plus o taxă fixă de curățenie, afișând un total transparent, fără taxe ascunse la pașii următori.
 
@@ -708,7 +708,7 @@ Pentru partea vizuală, o proprietate necesită imagini de calitate. Interfața 
 
 În final, gazda trebuie să selecteze exact ce facilități oferă spațiul său (de la Aer condiționat la Pătuț de copil) dintr-o rețea predefinită de peste 20 de opțiuni distincte.
 
-\textbf{CF-H03 — Generare asistată AI pentru titlu și descriere.} Pentru multe persoane, redactarea unui text publicitar atractiv este o sarcină descurajantă. Funcționalitatea \textit{Magic Generate} rezolvă acest impediment direct din formularul de creare. Când gazda apasă butonul asistat, platforma colectează invizibil toate datele tehnice introduse până în acel moment (tipul de proprietate, prețul, locația de pe hartă, facilitățile marcate) plus \textbf{prima fotografie} pe care a încărcat-o. Această cerere combinată (multimodală) este expediată către modelul de Inteligență Artificială GPT-4. Inteligența analizează fotografia (poate recunoaște o fereastră mare cu vedere la munte sau un șemineu luxos) și construiește un titlu de maxim 10 cuvinte extrem de atractiv, alături de o descriere fluentă și convingătoare, subliniind aspectele cele mai puternice ale casei. Gazda primește rezultatul și îl poate edita sau publica direct, scurtând cu zeci de minute procesul de listare.
+\textbf{CF-H03 — Generare asistată AI pentru titlu și descriere.} Pentru multe persoane, redactarea unui text publicitar atractiv este o sarcină descurajantă. Funcționalitatea \textit{Magic Generate} rezolvă acest impediment direct din formularul de creare. Când gazda apasă butonul asistat, platforma colectează invizibil toate datele tehnice introduse până în acel moment (tipul de proprietate, prețul, locația de pe hartă, facilitățile marcate) plus \textbf{prima fotografie} pe care a încărcat-o. Această cerere combinată (multimodală) este expediată către modelul de Inteligență Artificială Gemini 2.5 Flash. Modelul analizează fotografia (poate recunoaște o fereastră mare cu vedere la munte sau un șemineu luxos) și construiește un titlu de maxim 50 de caractere extrem de atractiv, alături de o descriere fluentă și convingătoare de două paragrafe, subliniind aspectele cele mai puternice ale casei. Gazda primește rezultatul și îl poate edita sau publica direct, scurtând cu zeci de minute procesul de listare.
 
 \textbf{CF-H04 — Editarea flexibilă a unui anunț existent.} Realitatea pieței impune modificări constante (schimbări de prețuri, adăugări de noi dotări). Pagina de gestionare permite reîncărcarea formularului de creare cu datele deja existente în baza de date. Gazda poate adăuga noi poze, poate șterge pozele vechi prin click direct pe iconița de ștergere aferentă previzualizării sau își poate schimba descrierea cu una nouă asistată de AI. Totul se validează și se sincronizează prin Supabase Storage fără reîncărcarea vizuală a întregii ferestre.
 
@@ -774,7 +774,7 @@ Baza de date PostgreSQL cuprinde opt tabele principale. Fiecare folosește UUID 
 
 PrimeRent adoptă o arhitectură \textbf{JAMstack} (JavaScript, API, Markup). Frontend-ul este o aplicație statică servită de un CDN, iar toate operațiunile dinamice sunt delegate unor API-uri și funcții serverless.
 
-Componentele arhitecturale: browserul utilizatorului (React SPA), Vercel CDN (fișiere statice), Supabase Cloud (PostgREST API, PostgreSQL cu pgvector, Storage, Edge Functions), OpenAI API (GPT-4 și embeddings) și Stripe API (procesare plăți).
+Componentele arhitecturale: browserul utilizatorului (React SPA), Vercel CDN (fișiere statice), Supabase Cloud (PostgREST API, PostgreSQL cu pgvector, Storage, Edge Functions), Google Gemini API (Gemini 2.5 Flash și gemini-embedding-001) și Stripe API (procesare plăți).
 
 
 % =============================================================================
@@ -878,7 +878,7 @@ Un caz special apare în modul ,,Top Rated'': proprietățile fără nicio recen
 
 \subsection{Căutarea semantică AI}
 
-Butonul ,,AI Search'' invocă Edge Function \texttt{smart-search}, care procesează query-ul utilizatorului în trei etape. Prima: convertirea textului în embedding vectorial cu \texttt{text-embedding-ada-002}. A doua: compararea vectorului rezultat cu toți vectorii proprietăților din baza de date, prin funcția PostgreSQL \texttt{match\_properties}. A treia, opțională: extragerea de filtre structurate din textul query-ului (locație, număr de oaspeți) folosind GPT-4o-mini, și aplicarea lor automată în interfață.
+Butonul ,,AI Search'' invocă Edge Function \texttt{smart-search}, care procesează query-ul utilizatorului în trei etape. Prima: convertirea textului în embedding vectorial cu \texttt{gemini-embedding-001}. A doua: compararea vectorului rezultat cu toți vectorii proprietăților din baza de date, prin funcția PostgreSQL \texttt{match\_properties}. A treia, opțională: extragerea de filtre structurate din textul query-ului (locație, număr de oaspeți) folosind \texttt{gemini-2.5-flash}, și aplicarea lor automată în interfață.
 
 Rezultatul: utilizatorul scrie ,,cozy mountain cabin for two with a fireplace'', iar aplicația returnează proprietăți relevante semantic \textit{și} setează automat filtrul de oaspeți la 2.
 
@@ -942,7 +942,7 @@ La submit, imaginile sunt uploadate în paralel prin \texttt{Promise.all()}, fie
 
 \subsection{Generarea AI a descrierii}
 
-Funcționalitatea ,,Generate with AI'' colectează toate datele din formular (titlu, adresă, facilități, preț, capacitate) și prima imagine (codificată base64). Acestea sunt trimise la Edge Function \texttt{generate-listing}, care construiește un prompt structurat pentru GPT-4. Când există o imagine, mesajul devine multimodal — GPT-4 Vision analizează fotografia și poate menționa elemente vizuale (o priveliște montană, o terasă, un interior luminos) în descrierea generată.
+Funcționalitatea ,,Generate with AI'' colectează toate datele din formular (titlu, adresă, facilități, preț, capacitate) și prima imagine (codificată base64). Acestea sunt trimise la Edge Function \texttt{generate-listing}, care construiește un prompt structurat pentru Gemini 2.5 Flash. Când există o imagine, mesajul devine multimodal — modelul analizează fotografia prin câmpul \texttt{inlineData} și poate menționa elemente vizuale (o priveliște montană, o terasă, un interior luminos) în descrierea generată.
 
 Rezultatul JSON (titlu + descriere) este populat automat în formular, dar gazda poate edita liber textul înainte de publicare.
 
@@ -960,7 +960,7 @@ Recenziile pot fi lăsate doar după finalizarea sejurului, printr-un dialog cu 
 
 \subsection{Arhitectura Edge Functions}
 
-Toate modulele AI sunt implementate ca \textbf{Edge Functions Supabase} — funcții serverless scrise în TypeScript, rulate în runtime-ul Deno la periferia rețelei. Arhitectura Edge Functions rezolvă o problemă fundamentală a aplicațiilor SPA: necesitatea de a apela API-uri care necesită chei secrete (OpenAI, Stripe), fără a expune aceste chei în codul JavaScript care rulează în browser.
+Toate modulele AI sunt implementate ca \textbf{Edge Functions Supabase} — funcții serverless scrise în TypeScript, rulate în runtime-ul Deno la periferia rețelei. Arhitectura Edge Functions rezolvă o problemă fundamentală a aplicațiilor SPA: necesitatea de a apela API-uri care necesită chei secrete (Google Gemini, Stripe), fără a expune aceste chei în codul JavaScript care rulează în browser.
 
 Fiecare Edge Function urmează un tipar arhitectural comun:
 
@@ -976,7 +976,7 @@ Deno.serve(async (req) => {
   // 2. Parsare body
   const { param1, param2 } = await req.json();
 
-  // 3. Apel API extern (OpenAI, Stripe)
+  // 3. Apel API extern (Google Gemini, Stripe)
   const result = await callExternalAPI(param1, param2);
 
   // 4. Returnare JSON
@@ -991,19 +991,19 @@ Header-ele CORS sunt partajate prin modulul \texttt{\_shared/cors.ts}, evitând 
 
 \subsection{Generare descriere (\texttt{generate-listing})}
 
-Funcția construiește un prompt structurat din datele proprietății: locație, capacitate, facilități, preț. Când gazda a uploadat o imagine, mesajul către GPT-4 devine \textbf{multimodal} — include atât text cât și imagine codificată base64, permițând modelului să observe și să descrie detalii vizuale din fotografie.
+Funcția construiește un prompt structurat din datele proprietății: locație, capacitate, facilități, preț. Când gazda a uploadat o imagine, mesajul către Gemini 2.5 Flash devine \textbf{multimodal} — include atât text cât și imagine codificată base64 (câmpul \texttt{inlineData}), permițând modelului să observe și să descrie detalii vizuale din fotografie.
 
-Parametrul \texttt{response\_format: \{type: "json\_object"\}} forțează GPT-4 să returneze exclusiv JSON valid cu structura predefinită (\texttt{title} și \texttt{description}), eliminând necesitatea de parsare a textului liber și reducând riscul de erori.
+Parametrul \texttt{responseMimeType: "application/json"} forțează Gemini să returneze exclusiv JSON valid cu structura predefinită (\texttt{title} și \texttt{description}), eliminând necesitatea de parsare a textului liber și reducând riscul de erori.
 
 \subsection{Căutare semantică (\texttt{smart-search})}
 
-Cea mai complexă Edge Function, cu trei pași secvențiali. \textbf{Primul}: conversia query-ului utilizatorului în vector de embedding prin \texttt{text-embedding-ada-002}. \textbf{Al doilea}: invocarea funcției PostgreSQL \texttt{match\_properties}, care compară vectorul cu toți vectorii din baza de date folosind operatorul \texttt{<=>} (distanță cosinus). Sunt returnate cele mai relevante proprietăți cu scor de similaritate peste pragul de 0.75.
+Cea mai complexă Edge Function, cu trei pași secvențiali. \textbf{Primul}: conversia query-ului utilizatorului în vector de embedding prin \texttt{gemini-embedding-001} (768 dimensiuni). \textbf{Al doilea}: invocarea funcției PostgreSQL \texttt{match\_properties}, care compară vectorul cu toți vectorii din baza de date folosind operatorul \texttt{<=>} (distanță cosinus). Sunt returnate cele mai relevante proprietăți cu scor de similaritate peste pragul de 0.75.
 
-\textbf{Al treilea} pas, opțional dar foarte util, folosește GPT-4o-mini pentru a extrage filtre structurate din textul query-ului. Dacă utilizatorul scrie ,,apartment in Cluj for 3 guests'', modelul extrage \texttt{\{city: "Cluj", guests: 3\}} și le aplică automat în interfață.
+\textbf{Al treilea} pas, opțional dar foarte util, folosește \texttt{gemini-2.5-flash} (prin SDK-ul \texttt{@google/generative-ai}) pentru a extrage filtre structurate din textul query-ului. Dacă utilizatorul scrie ,,apartment in Cluj for 3 guests'', modelul extrage \texttt{\{city: "Cluj", guests: 3\}} și le aplică automat în interfață.
 
 \subsection{Sumarizare recenzii (\texttt{summarize-reviews})}
 
-Primește textele tuturor recenziilor unei proprietăți, concatenate într-un singur string. Prompt-ul instruiește GPT-4o-mini să returneze un obiect JSON cu trei câmpuri: un rezumat narativ general, o listă de puncte forte (\texttt{pros}) și o listă de aspecte negative (\texttt{cons}). Gazda și potențialii oaspeți obțin astfel o sinteză rapidă, fără a fi nevoiți să citească zeci de recenzii individual.
+Primește textele tuturor recenziilor unei proprietăți, concatenate într-un singur string. Prompt-ul instruiește \texttt{gemini-2.5-flash} să returneze un obiect JSON cu trei câmpuri: un rezumat narativ general, o listă de puncte forte (\texttt{pros}) și o listă de aspecte negative (\texttt{cons}). Parametrul \texttt{responseMimeType: "application/json"} garantează structura răspunsului. Gazda și potențialii oaspeți obțin astfel o sinteză rapidă, fără a fi nevoiți să citească zeci de recenzii individual.
 
 \subsection{Indexare batch (\texttt{generate-embeddings})}
 
@@ -1182,7 +1182,7 @@ Conectarea repository-ului GitHub activează CI/CD automat: fiecare push pe \tex
 
 \section{Variabile de mediu}
 
-Aplicația necesită două variabile prefixate \texttt{VITE\_}: URL-ul și cheia anonimă Supabase. Cheia anonimă este publică prin design — securitatea este asigurată de RLS. Cheile secrete (OpenAI, Stripe) sunt stocate exclusiv ca Supabase Secrets, accesibile doar din Edge Functions.
+Aplicația necesită două variabile prefixate \texttt{VITE\_}: URL-ul și cheia anonimă Supabase. Cheia anonimă este publică prin design — securitatea este asigurată de RLS. Cheile secrete (\texttt{GEMINI\_API\_KEY}, Stripe) sunt stocate exclusiv ca Supabase Secrets, accesibile doar din Edge Functions.
 
 \section{Configurarea Supabase}
 
@@ -1242,7 +1242,7 @@ Orice card din rezultate prezintă o \textbf{inimioară} în colț. Dacă se fac
 Făcând click pe o proprietate din căutare, oaspetele deschide o vizualizare individuală detaliată (ruta \texttt{/explore/:id}). Ecranul este împărțit în două pe monitoarele mari.
 
 La stânga, conținutul: Galerie uriașă asimetrică ce poate fi deschisă în ecran complet apăsând orice poză, date tehnice detaliate și lista exhaustivă de facilități disponibile sau tăiate (indisponibile). Imediat sub ele e harta clădirii și lista lungă de recenzii anterioare.
-\textbf{Cum se folosește sumarizarea AI a recenziilor:} Imediat deasupra comentariilor tronează un card albastru intitulat \textit{AI Review Summary}. La apăsarea butonului din interior, utilizatorul trebuie să aștepte în medie 5-8 secunde, timp în care aplicația conectează direct modelul OpenAI. Când se termină, cardul se extinde și livrează un raport perfect curat, punând în evidență dacă locuința are sau nu probleme cronice (ex: „Mulți oaspeți s-au plâns de zgomotul de la stradă, dar laudă priveliștea'').
+\textbf{Cum se folosește sumarizarea AI a recenziilor:} Imediat deasupra comentariilor tronează un card albastru intitulat \textit{AI Review Summary}. La apăsarea butonului din interior, utilizatorul trebuie să aștepte în medie 5-8 secunde, timp în care aplicația conectează direct modelul Google Gemini 2.5 Flash. Când se termină, cardul se extinde și livrează un raport perfect curat, punând în evidență dacă locuința are sau nu probleme cronice (ex: „Mulți oaspeți s-au plâns de zgomotul de la stradă, dar laudă priveliștea'').
 
 La dreapta, plutește constant panoul interactiv de rezervare.
 \textbf{Cum se face plata efectivă:}
@@ -1331,7 +1331,7 @@ Ca produs MVP, PrimeRent are și limite: nu trimite notificări la acceptarea/an
 
 Ecosistemul React modern s-a dovedit extrem de productiv. TypeScript strict previne o întreagă clasă de erori. Supabase a redus dramatic complexitatea infrastructurală, iar Row Level Security a oferit securitate declarativă, fără cod suplimentar.
 
-Integrarea AI a demonstrat că funcționalitățile de inteligență artificială nu mai sunt exclusivitatea echipelor mari. Prin API-urile OpenAI și Edge Functions, un singur dezvoltator poate integra capabilități de nivel enterprise.
+Integrarea AI a demonstrat că funcționalitățile de inteligență artificială nu mai sunt exclusivitatea echipelor mari. Prin Google Gemini API și Edge Functions Supabase, un singur dezvoltator poate integra capabilități de nivel enterprise.
 
 Cele 40 de teste au detectat mai multe regresii pe parcursul refactorizărilor și au oferit încrederea necesară pentru modificări substanțiale ale codului.
 
@@ -1360,8 +1360,8 @@ Booking Holdings, \textit{Booking.com Developer API Documentation}, 2024. [Onlin
 \bibitem{vaswani2017}
 A.~Vaswani, N.~Shazeer, N.~Parmar et al., \textit{Attention Is All You Need}, in Advances in Neural Information Processing Systems (NeurIPS), vol.~30, 2017. arXiv:1706.03762.
 
-\bibitem{brown2020}
-T.~B.~Brown, B.~Mann, N.~Ryder et al., \textit{Language Models are Few-Shot Learners (GPT-3)}, arXiv:2005.14165, 2020.
+\bibitem{team2023gemini}
+Gemini Team Google, \textit{Gemini: A Family of Highly Capable Multimodal Models}, arXiv:2312.11805, 2023.
 
 \bibitem{fowler2002}
 M.~Fowler, \textit{Patterns of Enterprise Application Architecture}, Addison-Wesley Professional, 2002. ISBN: 978-0321127426.
@@ -1393,14 +1393,14 @@ Supabase, Inc., \textit{Row Level Security in Supabase}, 2024. [Online]. Disponi
 \bibitem{supabase-edge}
 Supabase, Inc., \textit{Supabase Edge Functions with Deno}, 2024. [Online]. Disponibil la: \url{https://supabase.com/docs/guides/functions}
 
-\bibitem{openai}
-OpenAI, \textit{OpenAI API Documentation}, 2024. [Online]. Disponibil la: \url{https://platform.openai.com/docs/}
+\bibitem{gemini}
+Google DeepMind, \textit{Gemini API Documentation}, 2024. [Online]. Disponibil la: \url{https://ai.google.dev/gemini-api/docs}
 
-\bibitem{openai-embeddings}
-OpenAI, \textit{Embeddings — text-embedding-ada-002}, 2024. [Online]. Disponibil la: \url{https://platform.openai.com/docs/guides/embeddings}
+\bibitem{gemini-embeddings}
+Google DeepMind, \textit{Gemini Embedding Models — gemini-embedding-001}, 2024. [Online]. Disponibil la: \url{https://ai.google.dev/gemini-api/docs/embeddings}
 
-\bibitem{openai-vision}
-OpenAI, \textit{GPT-4 Vision (Multimodal Inputs)}, 2024. [Online]. Disponibil la: \url{https://platform.openai.com/docs/guides/vision}
+\bibitem{gemini-vision}
+Google DeepMind, \textit{Gemini Multimodal Inputs — Vision capabilities}, 2024. [Online]. Disponibil la: \url{https://ai.google.dev/gemini-api/docs/vision}
 
 \bibitem{stripe}
 Stripe, Inc., \textit{Stripe Checkout Documentation}, 2024. [Online]. Disponibil la: \url{https://stripe.com/docs/checkout}
@@ -1495,7 +1495,7 @@ CREATE TABLE properties (
   bathrooms       INTEGER DEFAULT 1,
   main_image      TEXT,
   is_active       BOOLEAN DEFAULT true,
-  embedding       VECTOR(1536),
+  embedding       VECTOR(768),
   created_at      TIMESTAMPTZ DEFAULT now()
 );
 \end{lstlisting}
@@ -1609,7 +1609,7 @@ $$ LANGUAGE plpgsql;
 
 \begin{lstlisting}[language=SQL, caption={Funcția match\_properties (pgvector)}]
 CREATE OR REPLACE FUNCTION match_properties(
-  query_embedding VECTOR(1536),
+  query_embedding VECTOR(768),
   match_threshold FLOAT DEFAULT 0.75,
   match_count     INTEGER DEFAULT 20
 )
