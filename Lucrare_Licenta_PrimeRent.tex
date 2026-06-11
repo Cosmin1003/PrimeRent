@@ -46,6 +46,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{pifont}
+\usepackage{pdfpages}
 
 % ─── Cod sursă ───────────────────────────────────────────────────────────────
 \usepackage{listings}
@@ -131,34 +132,8 @@
 % =============================================================================
 \begin{document}
 
-% ─── PAGINA DE TITLU ─────────────────────────────────────────────────────────
-\begin{titlepage}
-\centering
-\vspace*{1cm}
-
-{\Large\textbf{Universitatea Transilvania din Brașov}}\\[0.3cm]
-{\large Facultatea de Matematică și Informatică}\\[0.3cm]
-{\large Domeniul Informatică}\\[2cm]
-
-{\Huge\textbf{LUCRARE DE LICENȚĂ}}\\[1.5cm]
-
-{\LARGE\textbf{PrimeRent — Platformă web pentru\\închirieri imobiliare pe termen scurt\\cu integrare de inteligență artificială}}\\[3cm]
-
-\begin{minipage}[t]{0.45\textwidth}
-\raggedright
-{\large\textbf{Coordonator științific:}}\\
-{\large [Coordonator]}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.45\textwidth}
-\raggedleft
-{\large\textbf{Absolvent:}}\\
-{\large Bardas Cristian}
-\end{minipage}
-
-\vfill
-{\large Brașov, 2026}
-\end{titlepage}
+% ─── COPERTA (PDF extern) ────────────────────────────────────────────────────
+\includepdf[pages=1]{coperta.pdf}
 
 % ─── CUPRINS ─────────────────────────────────────────────────────────────────
 \tableofcontents
@@ -1714,7 +1689,6 @@ WITH CHECK (auth.uid() = profile_id);
 \textbf{CI/CD} & Continuous Integration / Continuous Deployment \\
 \textbf{Tree-shaking} & Eliminarea codului neutilizat din bundle \\
 \textbf{RPC} & Remote Procedure Call — apelarea funcțiilor server din client \\
-\textbf{Hoisting} & Mutarea automată a declarațiilor la topul scopului \\
 \textbf{Mock} & Înlocuitor al unui modul real în teste \\
 \bottomrule
 \end{longtable}
