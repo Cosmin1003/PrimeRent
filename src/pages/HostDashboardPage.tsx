@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { PlusCircle, ClipboardList, LayoutDashboard } from "lucide-react";
+import { PlusCircle, LayoutDashboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 

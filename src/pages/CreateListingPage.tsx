@@ -350,8 +350,6 @@ export default function CreateListingPage() {
         throw new Error("Please upload at least one image for your property.");
       }
 
-      let propertyId = id;
-
       if (isEditMode) {
         // 1. Update basic property info
         const { error: updateError } = await supabase

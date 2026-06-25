@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Check, X, Home, User, Loader2, Rocket } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";

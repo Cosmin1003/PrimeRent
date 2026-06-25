@@ -286,8 +286,8 @@ export default function PropertyPage() {
         },
         body: JSON.stringify({
           property_id: id,
-          check_in: format(date.from, "yyyy-MM-dd"),
-          check_out: format(date.to, "yyyy-MM-dd"),
+          check_in: format(date!.from!, "yyyy-MM-dd"),
+          check_out: format(date!.to!, "yyyy-MM-dd"),
           guest_count: guestCount,
         }),
       });
