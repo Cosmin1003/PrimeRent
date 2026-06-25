@@ -189,26 +189,55 @@ const Navbar1 = ({ user, className }: NavbarProps) => {
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-6 p-4">
+                  {/* Navigation Links */}
                   <div className="flex flex-col gap-4">
-                    <Link to="/explore" className="text-md font-semibold">
-                      {t('navbar.explore')}
+                    <Link to="/explore" className="flex items-center gap-3 text-md font-semibold text-gray-800 hover:text-emerald-600 transition-colors">
+                      <Search className="size-4 text-emerald-600" />
+                      {t('navbar.exploreDestinations')}
                     </Link>
-                    <Link to="/bookings" className="text-md font-semibold">
+                    <Link to="/favorites" className="flex items-center gap-3 text-md font-semibold text-gray-800 hover:text-emerald-600 transition-colors">
+                      <Heart className="size-4 fill-gray-800" />
+                      {t('navbar.favorites')}
+                    </Link>
+                    <Link to="/bookings" className="flex items-center gap-3 text-md font-semibold text-gray-800 hover:text-emerald-600 transition-colors">
                       {t('navbar.myBookings')}
                     </Link>
+                    {role === "host" && (
+                      <Link to="/host/dashboard" className="flex items-center gap-3 text-md font-semibold text-gray-800 hover:text-emerald-600 transition-colors">
+                        {t('navbar.dashboard')}
+                      </Link>
+                    )}
                   </div>
 
+                  {/* Divider */}
+                  <div className="border-t border-gray-200" />
+
+                  {/* Language Switcher */}
+                  <div className="flex items-center gap-3">
+                    <LanguageSwitcher />
+                  </div>
+
+                  {/* Auth Section */}
                   <div className="flex flex-col gap-3">
                     {user ? (
-                      <Button
-                        variant="destructive"
-                        onClick={handleLogout}
-                        className="w-full cursor-pointer"
-                      >
-                        {t('navbar.signOut')}
-                      </Button>
+                      <>
+                        <Link
+                          to="/profile"
+                          className="flex items-center gap-3 text-md font-semibold text-gray-800 hover:text-emerald-600 transition-colors"
+                        >
+                          {profileName || user.email.split("@")[0]}
+                        </Link>
+                        <Button
+                          variant="destructive"
+                          onClick={handleLogout}
+                          className="w-full cursor-pointer"
+                        >
+                          <LogOut className="mr-2 size-4" />
+                          {t('navbar.signOut')}
+                        </Button>
+                      </>
                     ) : (
-                      <Button asChild className="w-full bg-black">
+                      <Button asChild className="w-full bg-black hover:bg-emerald-600 transition-colors">
                         <Link to="/auth">{t('navbar.logIn')}</Link>
                       </Button>
                     )}
