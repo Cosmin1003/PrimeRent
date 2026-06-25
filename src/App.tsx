@@ -40,7 +40,6 @@ function App() {
   return (
     <Router>
       <Navbar1 user={session?.user} />
-      {/* <Navbar user={session?.user} /> */}
       <main className="pt-16 min-h-screen bg-gray-50 text-slate-900">
         <Routes>
           <Route path="/" element={<HomePage user={session?.user} />} />

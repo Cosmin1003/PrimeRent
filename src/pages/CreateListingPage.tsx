@@ -98,8 +98,8 @@ export default function CreateListingPage() {
     bedrooms: 1,
     beds: 1,
     bathrooms: 1,
-    lat: 40.7128, // Default to NYC
-    lng: -74.006,
+    lat: 45.649641,
+    lng: 25.601452,
     main_image:
       "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
   });
@@ -134,20 +134,20 @@ export default function CreateListingPage() {
         Amenities included: ${amenityNames || "Basic amenities"}
       `;
 
-      // --- NEW: Grab the first image if the user uploaded one! ---
+      // Grab the first image if the user uploaded one! ---
       let base64Data = null;
       let mimeType = null;
-      
+
       if (images.length > 0) {
         // Grab the very first file they uploaded
-        const coverImage = images[0]; 
+        const coverImage = images[0];
         base64Data = await fileToBase64(coverImage);
         mimeType = coverImage.type; // e.g., "image/jpeg" or "image/png"
       }
 
       // Call your secure Supabase Edge Function, now with image data!
       const { data, error } = await supabase.functions.invoke('generate-listing', {
-        body: { 
+        body: {
           formData: facts,
           imageBase64: base64Data,
           mimeType: mimeType
@@ -156,12 +156,12 @@ export default function CreateListingPage() {
 
       if (error) throw error;
 
-      setFormData((prev) => ({ 
-        ...prev, 
+      setFormData((prev) => ({
+        ...prev,
         title: data.title,
         description: data.description
       }));
-      
+
     } catch (error: any) {
       console.error("AI Generation failed:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate description";
@@ -563,20 +563,20 @@ export default function CreateListingPage() {
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* --- BASIC INFO --- */}
           <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm space-y-6">
-            
+
             {/* Header and Button Container */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h3 className="text-xl font-bold flex items-center gap-2">
                 <Building2 className="text-emerald-600" size={20} /> {t('createListing.generalInfo')}
               </h3>
-              
+
               {/* AI MAGIC BUTTON (Moved to the top!) */}
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={handleGenerateDescription}
-                disabled={isGenerating || !formData.city} 
+                disabled={isGenerating || !formData.city}
                 className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 transition-colors w-full sm:w-auto cursor-pointer"
               >
                 <Sparkles size={16} className="mr-2" />

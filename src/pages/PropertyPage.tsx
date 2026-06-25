@@ -68,7 +68,14 @@ export default function PropertyPage() {
   };
 
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
-  const galleryImages = property?.property_images || [];
+  const galleryImages = property
+    ? [
+        ...(property.main_image ? [{ url: property.main_image }] : []),
+        ...(property.property_images || []).filter(
+          (img) => img.url !== property.main_image
+        ),
+      ]
+    : [];
 
   const [date, setDate] = useState<DateRange | undefined>({
     from: undefined,
@@ -131,7 +138,7 @@ export default function PropertyPage() {
         const avgRating =
           revData && revData.length > 0
             ? revData.reduce((acc, item) => acc + item.rating, 0) /
-              revData.length
+            revData.length
             : 0;
 
         setProperty({
@@ -247,13 +254,12 @@ export default function PropertyPage() {
     });
   };
 
-  // Add this helper near the top of your component or file
   const FUNCTION_URL =
     "https://dzmfdjgoxsvlzesjvhob.supabase.co/functions/v1/create-checkout";
 
   const handleReserve = async () => {
     if (!date?.from || !date?.to || !userId) {
-        alert(t('bookings.loading'));
+      alert(t('bookings.loading'));
     }
 
     setLoading(true);
@@ -307,18 +313,18 @@ export default function PropertyPage() {
   const handleGenerateSummary = async () => {
     if (reviews.length === 0) return;
     setIsSummarizing(true);
-    
+
     try {
       // Extract just the comments, ignoring empty ones
       const reviewTexts = reviews.map(r => r.comment).filter(Boolean);
-      
+
       const { data, error } = await supabase.functions.invoke('summarize-reviews', {
         body: { reviews: reviewTexts }
       });
 
       if (error) throw error;
       setAiSummary(data);
-      
+
     } catch (error: any) {
       console.error("AI Summary failed:", error);
       alert(`Error: ${error.message || "Failed to summarize reviews"}`);
@@ -405,18 +411,18 @@ export default function PropertyPage() {
           {/* Grid Placeholders for Airbnb aesthetic */}
           <div className="hidden md:block relative space-y-2">
             <div className="h-1/2 overflow-hidden bg-gray-200">
-              {property.property_images?.[1] && (
+              {galleryImages[1] && (
                 <img
-                  src={property.property_images[1].url}
+                  src={galleryImages[1].url}
                   onClick={() => setActiveImageIndex(1)}
                   className="w-full h-full object-cover hover:brightness-90 transition cursor-pointer"
                 />
               )}
             </div>
             <div className="h-1/2 overflow-hidden bg-gray-200">
-              {property.property_images?.[2] && (
+              {galleryImages[2] && (
                 <img
-                  src={property.property_images[2].url}
+                  src={galleryImages[2].url}
                   onClick={() => setActiveImageIndex(2)}
                   className="w-full h-full object-cover hover:brightness-90 transition cursor-pointer"
                 />
@@ -425,25 +431,25 @@ export default function PropertyPage() {
           </div>
           <div className="hidden md:block relative space-y-2">
             <div className="h-1/2 overflow-hidden bg-gray-200">
-              {property.property_images?.[3] && (
+              {galleryImages[3] && (
                 <img
-                  src={property.property_images[3].url}
+                  src={galleryImages[3].url}
                   onClick={() => setActiveImageIndex(3)}
                   className="w-full h-full object-cover hover:brightness-90 transition cursor-pointer"
                 />
               )}
             </div>
             <div className="h-1/2 overflow-hidden bg-gray-200">
-              {property.property_images?.[4] && (
+              {galleryImages[4] && (
                 <img
-                  src={property.property_images[4].url}
+                  src={galleryImages[4].url}
                   onClick={() => setActiveImageIndex(4)}
                   className="w-full h-full object-cover hover:brightness-90 transition cursor-pointer"
                 />
               )}
             </div>
           </div>
-          {(property.property_images?.length ?? 0) > 5 && (
+          {galleryImages.length > 5 && (
             <ShadButton
               variant="outline"
               className="absolute bottom-6 right-6 bg-white border-black text-xs font-bold shadow-md hover:bg-gray-200"
@@ -480,7 +486,7 @@ export default function PropertyPage() {
 
             <Separator className="my-8" />
 
-            {/* 2. Description (Now moved directly under Info) */}
+            {/* 2. Description */}
             <div>
               <h3 className="text-xl font-bold mb-4">{t('property.aboutSpace')}</h3>
               <p className="text-gray-700 leading-relaxed">
@@ -522,11 +528,11 @@ export default function PropertyPage() {
                       variant="outline"
                       className="mt-5 border-black font-bold px-6 h-12 rounded-xl hover:bg-gray-50"
                     >
-                    {t('property.showAllAmenities', { count: amenities.length })}
+                      {t('property.showAllAmenities', { count: amenities.length })}
                     </ShadButton>
                   </DialogTrigger>
 
-                  {/* Updated Dialog: p-0 and overflow-hidden are key here */}
+                  {/* Dialog: p-0 and overflow-hidden are key here */}
                   <DialogContent className="max-w-2xl h-[75vh] p-0 overflow-hidden rounded-3xl flex flex-col border-none shadow-2xl">
                     {/* 1. Sticky Header - stays at the top while you scroll the list */}
                     <DialogHeader className="p-8 pb-6 border-b flex-shrink-0 bg-white">
@@ -767,9 +773,9 @@ export default function PropertyPage() {
 
             {/* The AI Button (Only show if there are reviews and no summary yet) */}
             {reviews.length > 0 && !aiSummary && (
-              <ShadButton 
-                variant="outline" 
-                onClick={handleGenerateSummary} 
+              <ShadButton
+                variant="outline"
+                onClick={handleGenerateSummary}
                 disabled={isSummarizing}
                 className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 transition-colors w-full sm:w-auto cursor-pointer"
               >
@@ -789,7 +795,7 @@ export default function PropertyPage() {
               <p className="text-gray-700 leading-relaxed mb-6">
                 {aiSummary.summary}
               </p>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {/* Pros */}
                 {aiSummary.pros && aiSummary.pros.length > 0 && (
@@ -805,7 +811,7 @@ export default function PropertyPage() {
                     </ul>
                   </div>
                 )}
-                
+
                 {/* Cons */}
                 {aiSummary.cons && aiSummary.cons.length > 0 && (
                   <div>

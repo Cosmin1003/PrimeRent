@@ -23,7 +23,7 @@ export default function HostDashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Card 1: Reservations */}
-          <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md transition-all group flex flex-col h-full">
+          {/* <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md transition-all group flex flex-col h-full">
             <div className="size-14 bg-emerald-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-emerald-600 transition-colors">
               <ClipboardList className="text-emerald-600 size-7 group-hover:text-white transition-colors" />
             </div>
@@ -39,7 +39,7 @@ export default function HostDashboardPage() {
             >
               {t('dashboard.viewRequests')}
             </Button>
-          </div>
+          </div> */}
 
           {/* Card 2: Create Listing */}
           <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md transition-all group flex flex-col h-full">
